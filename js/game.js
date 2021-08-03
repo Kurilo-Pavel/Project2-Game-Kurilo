@@ -1,3 +1,4 @@
+'use strict'
 let game = {
   canvas: null,
   ctx: null,
@@ -26,7 +27,8 @@ let game = {
     });
   },
   init() {
-    this.canvas = document.getElementById('canvas');
+
+    // this.canvas = document.getElementById('canvas');
     var board = document.getElementById('board');
     this.ctx = this.canvas.getContext('2d');
     this.canvas.width = board.offsetWidth;

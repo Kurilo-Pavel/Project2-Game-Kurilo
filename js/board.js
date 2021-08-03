@@ -1,7 +1,7 @@
 game.board = {
   game: game,
   size: 10,
- cellSize: null,
+  cellSize: null,
   cells: [],
   ship: ['Small', 'Medium', 'Big', 'Huge'],
   rowNumber: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -32,9 +32,9 @@ game.board = {
     return {
       row: row,
       col: col,
-      x:  game.board.cellSize * col,
-      y:  game.board.cellSize * row,
-      cellsSize:  game.board.cellSize - 1
+      x: game.board.cellSize * col,
+      y: game.board.cellSize * row,
+      cellsSize: game.board.cellSize - 1
     }
   },
   createShips() {// отрисовываем корабли
@@ -46,7 +46,10 @@ game.board = {
         ship.setAttribute('src', 'image/ship' + game.board.ship[i] + '.png');
         ship.setAttribute('class', k + game.board.ship[i]);
         var shipHeight = game.board.cellSize;
-        // ship.style.position = 'absolute';
+        ship.style.position = 'absolute';
+        var shipWidth = ship.x
+        ship.style.left = shipHeight * (2 * k - i) + 'px';
+        ship.style.top = shipHeight * 1.5 * i + 'px';
         ship.style.height = shipHeight + 'px';
         ship.style.margin = shipHeight / 2 + 'px';
       }
@@ -73,7 +76,7 @@ game.board = {
 
 
     function save() {
-      for (var i = image.length-1; i > -1; i--) {
+      for (var i = image.length - 1; i > -1; i--) {
         position[i] = {
           top: image[i].offsetTop + 'px',
           left: image[i].offsetLeft + 'px',
@@ -81,12 +84,13 @@ game.board = {
       }
 
       function positions() {
-        for (var p = position.length-1; p >-1; p--) {
+        for (var p = position.length - 1; p > -1; p--) {
           image[p].style.top = position[p].top;
           image[p].style.left = position[p].left;
-          image[p].style.position = 'absolute';
+          image[p].style.position = 'fixed';
         }
       }
+
       positions();
     }
 
@@ -103,18 +107,18 @@ game.board = {
         clickInImgY = EO.pageY - DragImage.offsetTop;
         window.onmousemove = DragMove;
         window.onmouseup = DragStop;
-        console.log('clickInImgX',clickInImgX)
-        console.log('clickInImgY',clickInImgY)
+        console.log('clickInImgX', clickInImgX)
+        console.log('clickInImgY', clickInImgY)
       }
     }
 
     function DragMove(EO) {
       EO - EO || window.event;
       EO.preventDefault();
-      DragImageX = EO.pageX - clickInImgX;
-      DragImageY = EO.pageY - clickInImgY;
-      DragImage.style.left = DragImageX -game.board.cellSize/2+ 'px';
-      DragImage.style.top = DragImageY-game.board.cellSize/2 + 'px';
+      DragImageX = EO.pageX - clickInImgX - game.board.cellSize / 2;
+      DragImageY = EO.pageY - clickInImgY - game.board.cellSize / 2;
+      DragImage.style.left = DragImageX + 'px';
+      DragImage.style.top = DragImageY + 'px';
       DragImage.style.cursor = 'move';
       DragImage.style.position = 'absolute';
     }
@@ -129,12 +133,12 @@ game.board = {
     this.cells.forEach((cell) => {
       this.game.ctx.drawImage(this.game.sprites.cell, cell.x, cell.y, cell.cellsSize, cell.cellsSize);
       for (var i = 1; i <= this.game.board.rowNumber.length; i++) {
-        this.game.ctx.font = cell.cellsSize/1.5 + 'px Arial normal';
+        this.game.ctx.font = cell.cellsSize / 1.5 + 'px Arial normal';
         this.game.ctx.textAlign = 'center';
         this.game.ctx.textBaseline = 'middle';
         if (cell.row === i && cell.col === i) {
-          this.game.ctx.strokeText(this.colLetter[i - 1], cell.x+cell.cellsSize/2, cell.cellsSize/2);
-          this.game.ctx.strokeText(this.rowNumber[i - 1], cell.cellsSize/2, cell.cellsSize/2 + cell.y);
+          this.game.ctx.strokeText(this.colLetter[i - 1], cell.x + cell.cellsSize / 2, cell.cellsSize / 2);
+          this.game.ctx.strokeText(this.rowNumber[i - 1], cell.cellsSize / 2, cell.cellsSize / 2 + cell.y);
         }
       }
     });
