@@ -2,24 +2,29 @@
 let game = {
   size: 11,
   sizeRow: null,
-  ship: ['Small', 'Medium', 'Big', 'Huge'],
+  ship: ['1Small', '2Medium', '3Big', '4Huge'],
   rowNumber: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   colLetter: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
+  board: null,
+  boardShips: null,
+  battleBoard: null,
 }
 let boardGame = document.getElementById('boardGame');
 
 
-function dowloadImg(){
-  let img =document.createElement('img');
+function dowloadImg() {
+  let img = document.createElement('img');
   img.setAttribute('src', 'image/Battleship-High-Cop.jpg')
   img.setAttribute('id', 'img')
   img.style.width = '100%'
   img.style.height = '100%'
   img.style.zIndex = '10';
-  img.style.position= 'absolute';
+  img.style.position = 'absolute';
   boardGame.appendChild(img);
 }
+
 dowloadImg()
+
 function createButtonGame() {// создаем кнопку new game
   let buttonGame = document.createElement('input');
   boardGame.appendChild(buttonGame);
@@ -48,24 +53,25 @@ function createBoardShips() {
 
 createBoardShips()
 
-let boardShips = document.getElementById('ship');
-let board = document.getElementById('board');
+game.boardShips = document.getElementById('ship');
+game.board = document.getElementById('board');
 
 function createBord() { // отрисовываем поле 10х10
 
-  if (board.offsetWidth < board.offsetHeight) {
-    game.sizeRow = board.offsetWidth / 14;
+  if (game.board.offsetWidth < game.board.offsetHeight) {
+    game.sizeRow = game.board.offsetWidth / 14;
   } else {
-    game.sizeRow = board.offsetHeight / 14;
+    game.sizeRow = game.board.offsetHeight / 14;
   }
 
   let tab = document.createElement('table');
-  board.appendChild(tab);
+  game.board.appendChild(tab);
   tab.style.borderCollapse = 'collapse';
   tab.style.marginTop = game.sizeRow + 'px';
-  tab.style.marginLeft = game.sizeRow + boardShips.offsetLeft - board.offsetWidth + 'px';
+  tab.style.marginLeft = game.sizeRow + game.boardShips.offsetLeft - game.board.offsetWidth + 'px';
   tab.style.height = game.sizeRow * game.size + 'px';
   tab.style.width = game.sizeRow * game.size + 'px';
+
 
   for (let i = 1; i <= game.size; i++) {
     let row = document.createElement('tr');
@@ -82,17 +88,33 @@ function createBord() { // отрисовываем поле 10х10
 
 createBord()
 
+function createBattleBoard() {
+  let battleBoard = document.createElement('div');
+  game.board.appendChild(battleBoard);
+  battleBoard.setAttribute('id', 'battleBoard');
+  battleBoard.style.width = game.board.offsetWidth + 'px';
+  battleBoard.style.height = game.board.offsetHeight + 'px';
+  battleBoard.style.border = '1px solid red';
+  battleBoard.style.position = 'absolute';
+  battleBoard.style.top = game.board.offsetTop + 'px';
+  battleBoard.style.left = game.board.offsetLeft + 'px';
+}
+
+createBattleBoard()
+game.battleBoard = document.getElementById('battleBoard');
+
 function createShips() { // отрисовываем корабли
   for (let i = 0; i < game.ship.length; i++) {
     for (let k = 0; k < game.ship.length - i; k++) {
       let ship = document.createElement('img');
-      boardShips.appendChild(ship);
+      game.boardShips.appendChild(ship);
       ship.setAttribute('src', 'image/ship' + game.ship[i] + '.png');
-      ship.setAttribute('class', k + game.ship[i]);
+      ship.setAttribute('class', game.ship[i]);
       ship.style.position = 'absolute';
       ship.style.left = game.sizeRow * (3 * k + 3 - i) + 'px';
       ship.style.top = game.sizeRow * 2 * i + 'px';
       ship.style.height = game.sizeRow + 'px';
+      ship.style.width = game.ship[i][0] * game.sizeRow + 'px';
     }
   }
 }
@@ -106,19 +128,20 @@ function createButtonBack() {// создаем кнопку back
   buttonBack.setAttribute('value', 'Back');
   buttonBack.setAttribute('id', 'back');
   buttonBack.setAttribute('onclick', 'back()');
-  }
+}
 
 createButtonBack()
 
 function createButtonPlay() {// создаем кнопку play
-  if (boardShips.innerHTML === "") {
+  if (game.boardShips.innerHTML === "") {
     let buttonPlay = document.createElement('input');
     boardGame.appendChild(buttonPlay);
     buttonPlay.setAttribute('type', 'button');
     buttonPlay.setAttribute('value', 'Play');
     buttonPlay.setAttribute('id', 'play');
     buttonPlay.setAttribute('onclick', 'play()');
-  }else{}
+  } else {
+  }
 }
 
 function pullImage() {
@@ -126,7 +149,7 @@ function pullImage() {
   let table = document.getElementsByTagName('table');
   let clickInImgX;
   let clickInImgY;
-  var image = boardShips.querySelector('img');
+  var image = game.boardShips.querySelector('img');
   var position = [];
   window.onload = save;
 
@@ -162,6 +185,8 @@ function pullImage() {
       firstPositionTop = DragImage.style.top;
       DragImage.style.cursor = 'grabbing';
       DragImage.style.position = 'absolute';
+      DragImage.style.border = '1px solid black';
+      DragImage.style.boxSizing = 'border-box';
       clickInImgX = EO.pageX - DragImage.offsetLeft;
       clickInImgY = EO.pageY - DragImage.offsetTop;
       window.onmousemove = DragMove;
@@ -174,42 +199,43 @@ function pullImage() {
     EO.preventDefault();
     let DragImageX;
     let DragImageY;
-    DragImageY = Math.round((EO.pageY - clickInImgY) / game.sizeRow) * game.sizeRow;
-    if (DragImage.offsetParent != board) {
-      DragImageX = Math.round((EO.pageX - clickInImgX) / game.sizeRow) * game.sizeRow;
+    DragImageY = EO.pageY - clickInImgY;
+    if (DragImage.offsetParent != game.battleBoard) {
+      DragImageX = EO.pageX - clickInImgX;
     } else {
-      DragImageX = Math.round((EO.pageX - clickInImgX) / game.sizeRow) * game.sizeRow
-        + boardShips.offsetLeft - board.offsetWidth;
+      DragImageX = EO.pageX - clickInImgX + game.boardShips.offsetLeft - game.board.offsetWidth;
     }
     DragImage.style.left = DragImageX + 'px';
     DragImage.style.top = DragImageY + 'px';
     DragImage.style.cursor = 'grabbing';
     DragImage.style.position = 'absolute';
+
   }
 
   function DragStop(EO) {
     EO = EO || window.event;
     let DragImagePosition = DragImage.getBoundingClientRect();
     let tablePosition = table[0].getBoundingClientRect();
-    if (DragImagePosition.left < tablePosition.left + game.sizeRow || DragImagePosition.right > tablePosition.right
+    if (DragImagePosition.left < tablePosition.left + game.sizeRow || DragImagePosition.right > tablePosition.right + game.sizeRow / 2
       || DragImagePosition.top < tablePosition.top + game.sizeRow || DragImagePosition.bottom > tablePosition.bottom) {
       DragImage.style.left = firstPositionLeft;
       DragImage.style.top = firstPositionTop;
 
     } else if
-    (DragImage.offsetParent != board) {
-      board.appendChild(DragImage);
-      DragImage.style.left = DragImage.style.left.replace('px', '') * 1 + boardShips.offsetLeft + 'px';
-      DragImage.style.top = DragImage.style.top;
-    } else if (DragImage.offsetParent == board) {
-
+    (DragImage.offsetParent != game.battleBoard) {
+      game.battleBoard.appendChild(DragImage);
+      DragImage.style.left = Math.round(DragImage.style.left.replace('px', '') * 1 / game.sizeRow) * game.sizeRow
+        + game.boardShips.offsetLeft + 'px';
+      DragImage.style.top = Math.round(DragImage.style.top.replace('px', '') * 1 / game.sizeRow) * game.sizeRow + 'px';
+    } else if (DragImage.offsetParent == game.battle.Board) {
+      DragImage.style.top = Math.round(DragImagePosition.top / game.sizeRow) * game.sizeRow + 'px';
+      DragImage.style.left = Math.ceil(DragImagePosition.left / game.sizeRow) * game.sizeRow
+        - game.boardShips.offsetLeft + game.board.offsetWidth + game.board.offsetLeft + 'px';
     }
-    if (boardShips.innerHTML === "") {
-      createButtonPlay()
-
+    if (game.boardShips.innerHTML === "") {
+      createButtonPlay();
     }
-    console.log(boardShips.innerHTML)
-    // console.log(boardGame.innerHTML)
+    console.log(game.battleBoard.children)
     window.onmousemove = null;
     window.onmouseup = null;
     DragImage.style.cursor = 'auto';
@@ -275,7 +301,7 @@ Letters()
 
 function createButtonUpdate() {// создаем кнопку rotate
   var buttonReturn = document.createElement('input');
-  board.appendChild(buttonReturn);
+  game.board.appendChild(buttonReturn);
   buttonReturn.setAttribute('type', 'button');
   buttonReturn.setAttribute('value', 'Update');
   buttonReturn.setAttribute('onclick', 'Update()');
@@ -283,14 +309,15 @@ function createButtonUpdate() {// создаем кнопку rotate
   buttonReturn.style.bottom = buttonReturn.offsetHeight / 2 + 'px'
   buttonReturn.style.position = 'absolute';
 }
+
 createButtonUpdate()
 
 function Update() {
 
   let ship = document.getElementsByTagName('img');
   for (let i = 0; i < ship.length; i++) {
-    if (ship[i].offsetParent == board) {
-      boardShips.appendChild(ship[i])
+    if (ship[i].offsetParent == game.board) {
+      game.boardShips.appendChild(ship[i])
     }
   }
   createButtonPlay()
@@ -298,3 +325,4 @@ function Update() {
 
 // попробовать привязать id корабля с его расположением
 // спрятать кнопку play при нажатии кнопки update (display none)
+// создать дистанцию кораблей
