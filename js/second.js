@@ -103,18 +103,36 @@ function createBattleBoard() {
 createBattleBoard()
 game.battleBoard = document.getElementById('battleBoard');
 
+let help
+function createInform(){
+  help = document.createElement('div');
+  help
+  help.style.width = '100%';
+  game.boardShips.appendChild(help);
+  let textHelp = document.createElement('p');
+  help.appendChild(textHelp);
+  textHelp.style.margin = game.sizeRow+'px';
+  textHelp.textContent = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Earum exercitationem numquam officia optio veritatis! Assumenda beatae cupiditate delectus enim illo, officia quae quos temporibus! Adipisci alias amet aut ducimus eius est eum fugit illum minus mollitia, perferendis, repellendus reprehenderit repudiandae suscipit voluptas? Alias animi cumque nam praesentium quam quasi voluptatem!'
+
+
+}
+createInform()
+
 function createShips() { // отрисовываем корабли
   for (let i = 0; i < game.ship.length; i++) {
+    let posLeft = game.sizeRow
     for (let k = 0; k < game.ship.length - i; k++) {
       let ship = document.createElement('img');
       game.boardShips.appendChild(ship);
       ship.setAttribute('src', 'image/ship' + game.ship[i] + '.png');
       ship.setAttribute('class', game.ship[i]);
       ship.style.position = 'absolute';
-      ship.style.left = game.sizeRow * (3 * k + 3 - i) + 'px';
-      ship.style.top = game.sizeRow * 2 * i + 'px';
-      ship.style.height = game.sizeRow + 'px';
       ship.style.width = game.ship[i][0] * game.sizeRow + 'px';
+      ship.style.left = posLeft + 'px';
+      posLeft += ship.offsetWidth + game.sizeRow
+      ship.style.top = game.sizeRow * 2 * i + help.getBoundingClientRect().bottom+ game.sizeRow + 'px';
+      ship.style.height = game.sizeRow + 'px';
+
     }
   }
 }
@@ -149,8 +167,9 @@ function pullImage() {
   let table = document.getElementsByTagName('table');
   let clickInImgX;
   let clickInImgY;
-  var image = game.boardShips.querySelector('img');
-  var position = [];
+  let image = game.boardShips.querySelector('img');
+  let position = [];
+
   window.onload = save;
 
   function save() {
@@ -200,16 +219,27 @@ function pullImage() {
     let DragImageX;
     let DragImageY;
     DragImageY = EO.pageY - clickInImgY;
+    let boardImage = game.board.children;
     if (DragImage.offsetParent != game.battleBoard) {
       DragImageX = EO.pageX - clickInImgX;
     } else {
       DragImageX = EO.pageX - clickInImgX + game.boardShips.offsetLeft - game.board.offsetWidth;
+
+      console.log(boardImage[1])
+      for (let n = 0; n < boardImage.length; n++) {
+        if (DragImage.offsetLeft - game.sizeRow < boardImage[n].offsetLeft + boardImage[n].offsetWidth
+          || DragImage.offsetLeft - game.sizeRow < boardImage[n].offsetLeft &&
+          DragImage.offsetLeft + DragImage.offsetWidth + game.sizeRow > boardImage[n].offsetLeft + boardImage[n].offsetWidth
+          || DragImage.offsetLeft + DragImage.offsetWidth + game.sizeRow > boardImage[n].offsetLeft) {
+          DragImage.style.border = '2px solid red'
+        }
+      }
+
     }
     DragImage.style.left = DragImageX + 'px';
     DragImage.style.top = DragImageY + 'px';
     DragImage.style.cursor = 'grabbing';
     DragImage.style.position = 'absolute';
-
   }
 
   function DragStop(EO) {
@@ -227,15 +257,16 @@ function pullImage() {
       DragImage.style.left = Math.round(DragImage.style.left.replace('px', '') * 1 / game.sizeRow) * game.sizeRow
         + game.boardShips.offsetLeft + 'px';
       DragImage.style.top = Math.round(DragImage.style.top.replace('px', '') * 1 / game.sizeRow) * game.sizeRow + 'px';
-    } else if (DragImage.offsetParent == game.battle.Board) {
+    } else if (DragImage.offsetParent == game.battleBoard) {
       DragImage.style.top = Math.round(DragImagePosition.top / game.sizeRow) * game.sizeRow + 'px';
       DragImage.style.left = Math.ceil(DragImagePosition.left / game.sizeRow) * game.sizeRow
         - game.boardShips.offsetLeft + game.board.offsetWidth + game.board.offsetLeft + 'px';
+      DragImage.style.border = '2px solid black'
     }
     if (game.boardShips.innerHTML === "") {
       createButtonPlay();
     }
-    console.log(game.battleBoard.children)
+
     window.onmousemove = null;
     window.onmouseup = null;
     DragImage.style.cursor = 'auto';
@@ -316,7 +347,7 @@ function Update() {
 
   let ship = document.getElementsByTagName('img');
   for (let i = 0; i < ship.length; i++) {
-    if (ship[i].offsetParent == game.board) {
+    if (ship[i].offsetParent == game.battleBoard) {
       game.boardShips.appendChild(ship[i])
     }
   }
