@@ -9,6 +9,7 @@ let game = {
   board: null,
   boardShips: null,
   battleBoard: null,
+  busy: [[],[]],
 }
 let boardGame = document.getElementById('boardGame');
 
@@ -58,6 +59,22 @@ createBoardShips()
 game.boardShips = document.getElementById('ship');
 game.board = document.getElementById('board');
 
+function createBattleBoard() {
+  let battleBoard = document.createElement('div');
+  game.board.appendChild(battleBoard);
+  battleBoard.setAttribute('id', 'battleBoard');
+  battleBoard.style.width = game.board.offsetWidth + 'px';
+  battleBoard.style.height = game.board.offsetHeight + 'px';
+  battleBoard.style.border = '1px solid red';
+  battleBoard.style.position = 'absolute';
+  battleBoard.style.top = game.board.offsetTop + 'px';
+  battleBoard.style.left = game.board.offsetLeft + 'px';
+}
+
+createBattleBoard()
+
+game.battleBoard = document.getElementById('battleBoard');
+
 function createBord() { // отрисовываем поле 10х10
 
   if (game.board.offsetWidth < game.board.offsetHeight) {
@@ -70,10 +87,9 @@ function createBord() { // отрисовываем поле 10х10
   game.board.appendChild(tab);
   tab.style.borderCollapse = 'collapse';
   tab.style.marginTop = game.sizeRow + 'px';
-  tab.style.marginLeft = game.sizeRow + 'px';
+  tab.style.marginLeft = game.sizeRow + game.battleBoard.offsetLeft + 'px';
   tab.style.height = game.sizeRow * game.size + 'px';
   tab.style.width = game.sizeRow * game.size + 'px';
-
   for (let i = 1; i <= game.size; i++) {
     let row = document.createElement('tr');
     tab.appendChild(row);
@@ -88,22 +104,6 @@ function createBord() { // отрисовываем поле 10х10
 }
 
 createBord()
-
-function createBattleBoard() {
-  let battleBoard = document.createElement('div');
-  game.board.appendChild(battleBoard);
-  battleBoard.setAttribute('id', 'battleBoard');
-  battleBoard.style.width = game.board.offsetWidth + 'px';
-  battleBoard.style.height = game.board.offsetHeight + 'px';
-  battleBoard.style.border = '1px solid red';
-  battleBoard.style.position = 'absolute';
-  battleBoard.style.top = game.board.offsetTop + 'px';
-  battleBoard.style.left = game.board.offsetLeft + 'px';
-
-}
-
-createBattleBoard()
-game.battleBoard = document.getElementById('battleBoard');
 
 let help
 
@@ -155,15 +155,14 @@ function createButtonBack() {// создаем кнопку back
 createButtonBack()
 
 function createButtonPlay() {// создаем кнопку play
-  if (game.boardShips.innerHTML === "") {
+
     let buttonPlay = document.createElement('input');
     boardGame.appendChild(buttonPlay);
     buttonPlay.setAttribute('type', 'button');
     buttonPlay.setAttribute('value', 'Play');
     buttonPlay.setAttribute('id', 'play');
     buttonPlay.setAttribute('onclick', 'play()');
-  } else {
-  }
+
 }
 
 function pullImage() {
@@ -281,19 +280,39 @@ function pullImage() {
       DragImage.style.left = Math.round(DragImagePosition.left / game.sizeRow) * game.sizeRow + 'px';
       DragImage.style.border = '0'
     }
-    if (game.boardShips.innerHTML === "") {
+    if (game.battleBoard.children.length == 10) {
       createButtonPlay();
+      squareBusy()
     }
-
-
     window.onmousemove = null;
     window.onmouseup = null;
     DragImage.style.cursor = 'auto';
   }
 }
-
-
 pullImage()
+//---------------------------------------------------------------
+
+function squareBusy(){
+  let table = document.getElementsByTagName('table')
+  let tablePosition = table[0].getBoundingClientRect();
+let squareShip = game.battleBoard.children
+  for (let i =0; i<squareShip.length;i++){
+  let squareX = Math.ceil((squareShip[i].offsetLeft - tablePosition.left) / game.sizeRow);
+  console.log(squareX)
+  let squareY = Math.ceil((squareShip[i].offsetTop - tablePosition.top) / game.sizeRow);
+  console.log(squareY)
+
+  if (squareShip[i].style.transform === '') {
+    game.busy[0].push(squareX);
+    game.busy[1].push(squareY);
+  } else {
+    game.busy[0].push(squareX);
+    game.busy[1].push(squareY);
+  }}
+  console.log(game.busy)
+// -------------------------------------------------------------
+}
+squareBusy()
 
 // поворот на 90
 document.addEventListener("contextmenu", Rotate, false);
