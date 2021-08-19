@@ -18,8 +18,8 @@ div{
   display: inline-block;
   position: absolute;
   margin: 0;
-  width: 49%;
-  height: 90%;
+  width: 50%;
+  height: 70%;
   border: 1px black solid;
 }
 #ship{
@@ -32,7 +32,7 @@ div{
 
 }
 input{
-font-size: 30px;
+font-size: 20px;
   border-radius: 15px;
   padding:0 15px 0 15px;
   margin: 5px;
@@ -42,4 +42,5 @@ font-size: 30px;
 #play{
 
   right: 0;
+}
 }
