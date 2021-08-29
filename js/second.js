@@ -9,7 +9,7 @@ let game = {
   board: null,
   boardShips: null,
   battleBoard: null,
-  HomeShips: null,
+  homeShips: null,
   busy: [],
   randomPlayer: [],
   randomComputer: [],
@@ -18,100 +18,351 @@ let game = {
   }
 }
 let boardGame = document.getElementById('boardGame');
-
-
-function anketa(){
-  let windowModal = document.createElement('div');
-  windowModal.id = 'modal';
-  windowModal.style.width = '40%';
-  windowModal.style.height = '30%';
-  windowModal.style.position = 'fixed';
-  windowModal.style.display = 'inline-block';
-  windowModal.style.background = 'grey';
-  windowModal.style.zIndex = '50';
-  windowModal.style.left = '50%';
-  windowModal.style.top = '50%';
-  windowModal.style.border = '3px solid darkblue';
-  windowModal.style.transform = 'translate(-50%, -50%)';
-  windowModal.style.textAlign = 'center';
-  boardGame.appendChild(windowModal);
-  let text = document.createElement('h3');
-  text.style.margin = '10px';
-  text.style.color = 'white';
-  text.textContent = 'Укажите свое имя';
-  windowModal.appendChild(text);
-  let fieldName = document.createElement('input');
-  fieldName.type = 'text';
-  fieldName.value = 'name';
-  fieldName.style.paddingLeft = '15px';
-  fieldName.style.position = 'relative';
-  fieldName.style.color = 'darkblue';
-  fieldName.style.width = windowModal.offsetWidth-parseInt(fieldName.style.paddingLeft)*3+'px';
-
-  fieldName.style.margin = '5px';
-  windowModal.appendChild(fieldName);
-
-  let buttonModalOk = document.createElement('input');
-  buttonModalOk.type = 'button';
-  buttonModalOk.value = 'OK';
-  buttonModalOk.style.position = 'relative';
-  buttonModalOk.style.fontSize = '13px';
-  buttonModalOk.onclick = Modal;
-  windowModal.appendChild(buttonModalOk)
-
-  let buttonModalCancle = document.createElement('input');
-  buttonModalCancle.type = 'button';
-  buttonModalCancle.value = 'Cancle';
-  buttonModalCancle.style.position = 'relative';
-  buttonModalCancle.style.fontSize = '13px';
-  buttonModalCancle.onclick = Cancle;
-
-  windowModal.appendChild(buttonModalCancle)
-
+//------------------------------------------------
+class Element{
+  constructor(selector) {
+    this.selector = document.createElement(selector)
+  }
+  hide(){
+    this.selector.style.display = 'none'
+  }
+  show(){
+    this.selector.style.display = 'inline-block'
+  }
 }
-anketa()
-// создаем div для отображения поля расстановки кораблей
-function createBoard() {
-
-  let board = document.createElement('div');
-  boardGame.appendChild(board);
-  board.setAttribute('id', 'board');
+class Field extends Element{
+  constructor(options){
+    super(options.selector)
+   const par = document.getElementById(options.parent)
+   par.appendChild(this.selector)
+    this.selector.id = options.id
+    this.selector.style.width = options.width
+    this.selector.style.height = options.height
+    this.selector.style.position = options.position
+    this.selector.style.border = options.border
+    this.selector.style.left = options.left
+    this.selector.style.right = options.right
+    this.selector.style.top = options.top
+    this.selector.style.margin = options.margin
+    this.selector.style.background = options.background
+    this.selector.style.zIndex = options.zIndex
+    this.selector.style.transform = options.transform
+    this.selector.style.textAlign = options.textAlign
+    this.selector.style.fontSize = options.fontSize
+    this.selector.style.display = options.display
+  }
 }
-createBoard()
+const modalWind = new Field({ // модалка
+  parent: 'boardGame',
+  selector: 'div',
+  id: 'modal',
+  width: '40%',
+  height: '30%',
+  position: 'fixed',
+  background: 'grey',
+  zIndex: '50',
+  left: '50%',
+  top: '50%',
+  transform: 'translate(-50%, -50%)',
+  textAlign: 'center',
+  border: '2px solid white',
+  display: 'none'
+})
+class  TextModal extends Field{ // текст млдалки
+  constructor(options) {
+    super(options);
+    this.selector.style.color = options.color
+    this.selector.textContent = options.textContent
+  }
+}
+const text = new TextModal({
+  parent: 'modal',
+  selector: 'h3',
+  id: 'textMod',
+  margin: '10px',
+  color: 'white',
+  textContent: 'Укажите свое имя'
+})
+class FieldName extends TextModal{
+  constructor(options) {
+    super(options);
+    this.selector.style.paddingLeft = options.paddingLeft
+    this.selector.value = options.value
+    this.selector.type = options.type
+  }
+}
+class Button extends FieldName{
+  constructor(options) {
+    super(options);
+    this.selector.onclick = options.onclick
+  }
+}
+const fName = new FieldName({ // поле ввода модалки
+  parent: 'modal',
+  selector: 'input',
+  id: 'name',
+  position: 'relative',
+  type: 'text',
+  value: 'name',
+  paddingLeft: '15px',
+  color: 'darkblue',
+  width: '80%'
+})
+
+const butOk = new  Button({ // кнопка ОК
+  parent: 'modal',
+  selector: 'input',
+  id: 'Ok',
+  position: 'relative',
+  type: 'button',
+  value: 'Ok',
+  fontSize: '13px',
+  onclick: ok,
+
+})
+const butCancle = new Button({ //кнопка Отмена
+  parent: 'modal',
+  selector: 'input',
+  id: 'Cancle',
+  position: 'relative',
+  type: 'button',
+  value: 'Cancle',
+  fontSize: '13px',
+  onclick: cancle
+})
+const boardPlayer = new Field({ // поле игрока
+  parent: 'boardGame',
+  selector: 'div',
+  id: 'board',
+})
+if (board.offsetWidth < board.offsetHeight) {
+  game.sizeRow = Math.round(board.offsetWidth / 14);
+} else {
+  game.sizeRow = Math.round(board.offsetHeight / 14);
+}
+const boardShips = new Field({ //пoле компьютера
+  parent: 'boardGame',
+  selector: 'div',
+  id: 'ship'
+})
+const battle = new Field({ // поле куда заносим корабли
+  parent: 'boardGame',
+  selector: 'div',
+  id: 'battleBoard',
+  width: '50%',
+  height: '70%',
+  top: '0',
+  border: '1px solid red',
+  position: 'absolute',
+  boxSizing: 'border-box'//???????????????
+})
+const inform = new Field({ // поле подсказки
+  parent: 'ship',
+  selector: 'div',
+  id: 'help',
+  width: '100%',
+  // top:
+})
+
+let textH = new TextModal({ // текст в поле подсказке
+  parent: 'help',
+  selector: 'p',
+  id: 'textHelp',
+  margin: game.sizeRow + 'px',
+  fontSize: '15px',
+  textContent: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
+    'Earum exercitationem numquam officia optio veritatis! Assumenda beatae ' +
+    'cupiditate delectus enim illo, officia quae quos temporibus! Adipisci' +
+    ' alias amet aut ducimus eius est eum fugit illum minus mollitia, ' +
+    'perferendis, repellendus reprehenderit repudiandae suscipit voluptas?' +
+    ' Alias animi cumque nam praesentium quam quasi voluptatem!'
+})
+const homeShips = new Field({
+  parent: 'ship',
+  selector: 'div',
+  id: 'HomeShips',
+  border: '1px solid green',
+  position: 'absolute',
+  height: 9*game.sizeRow + 'px',
+  width: '100%',
+})
+class Img extends Field{
+  constructor(options) {
+    super(options);
+    this.selector.src = options.src
+  }
+}
+const firstImg = new Img({ // Главное изображение
+  parent: 'boardGame',
+  selector: 'img',
+  id: 'img',
+  width: '100%',
+  height: '100%',
+  position: 'fixed',
+  src: 'image/Battleship-High-Cop.jpg',
+})
+
+const buttonNewGame = new Button({ //кнопка New game
+  parent: 'boardGame',
+  selector: 'input',
+  id: 'newGame',
+  value: 'New game',
+  type: 'button',
+  onclick: newGame
+})
+const buttonBack = new Button({ //кнопка Back
+  parent: 'boardGame',
+  selector: 'input',
+  id: 'back',
+  value: 'Back',
+  type: 'button',
+  onclick: back
+})
+const buttonUpdate = new Button({ //кнопка Update
+  parent: 'battleBoard',
+  selector: 'input',
+  id: 'update',
+  value: 'Update',
+  type: 'button',
+  onclick: Update,
+  position: 'absolute',
+  right: '5%'
+})
+const buttonPlay = new Button({ //кнопка Play
+  parent: 'boardGame',
+  selector: 'input',
+  id: 'play',
+  value: 'Play',
+  type: 'button',
+  onclick: play,
+
+})
+const buttonRandom = new Button({ //кнопка Random
+  parent: 'battleBoard',
+  selector: 'input',
+  id: 'Random',
+  value: 'Random',
+  type: 'button',
+  onclick: wrapperRandom,//???????????????????????
+  position: 'absolute'
+})
+const total = new Field({
+  parent: 'boardGame',
+  selector: 'div',
+  id: 'total',
+  width: '100%',
+  height: '10%',
+  top: boardPlayer.selector.offsetHeight + 'px',
+  textAlign: 'center',
+  dorder: '1px solid blue',
+  position: 'absolute'
+})
+const winner = new Img({
+  parent: 'boardGame',
+  selector: 'img',
+  id: 'winner',
+  position: 'absolute',
+  left: '50%',
+  transform: 'translate(-50%, 0)',
+  src: '../youwin.gif',
+  display: 'none'
+})
+const totalPlayer = new TextModal({
+  parent: 'total',
+  selector: 'h4',
+  margin: '10px',
+  fontSize: '25px',
+  position: 'absolute',
+  left: '15%',
+  textContent: 'player'
+})
+const totalComputer = new TextModal({
+  parent: 'total',
+  selector: 'h4',
+  margin: '10px',
+  fontSize: '25px',
+  position: 'absolute',
+  right: '15%',
+  textContent: 'computer'
+})
+
+//------------------------------------------------
+function newGame(){
+  modalWind.show()
+}
+
+function cancle(){
+  modalWind.hide()
+}
+
+function ok() {
+  if (fName.selector.value.length >= 5) {
+    modalWind.hide()
+    switchToList({page: 'second'});
+
+  } else {
+    alert('Имя должно содержать болеше 4 символов!!!')
+  }
+}
+function back() {
+  let statePage = JSON.parse(decodeURIComponent(location.hash.substr(1))).page;
+  if (statePage == 'second') {
+    switchToList({page: 'first'});
+  } else {
+    switchToList({page: 'second'});
+  }
+}
+function play() {
+  switchToList({page: 'third'});
+  console.log(HomeShips)
+  // createHomeShips()
+  createShip(game.shipComputer, 'computer');
+  random(HomeShips, game.randomPlayer, 'computer');
+  winner()
+}
+function random(field, bus, name) {
+  bus=[];
+  let table = document.getElementsByTagName('table');
+  let ship = document.querySelectorAll('.'+name+'');
+  let posRanShipX;
+  let posRanShipY;
+  for (let i = 0; i < ship.length; i++) {
+    ship[i].style.transformOrigin = '0 0';
+    let vertical = (game.random(1) == 1) ? (ship[i].style.transform = 'rotate(90deg)') : (ship[i].style.transform = '')
+    field.appendChild(ship[i]);
+    if (!ship[i].style.transform) {
+      posRanShipX = game.random(9 - Math.floor(ship[i].offsetWidth) / Math.round(game.sizeRow));
+      posRanShipY = game.random(9);
+      ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow + 'px';
+      ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
+      for (let p = 1; p <= Math.round(ship[i].offsetWidth / 10) * 10 / (Math.round(game.sizeRow / 10) * 10); p++) {
+        bus.push([posRanShipX + p, posRanShipY + 1]);
+      }
+    } else {
+      posRanShipX = game.random(9);
+      posRanShipY = game.random(9 - Math.floor(ship[i].offsetWidth) / Math.round(game.sizeRow));
+      ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow * 2 + 'px';
+      ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
+      for (let p = 1; p <= Math.round(ship[i].offsetWidth / 10) * 10 / (Math.round(game.sizeRow / 10) * 10); p++) {
+        bus.push([posRanShipX + 1, posRanShipY + 1]);
+      }
+    }
+  }
+}
+function wrapperRandom() {
+  random(battleBoard, game.randomPlayer, 'player')
+}
+
+//------------------------------------------------
+
+
+
 
 game.board = document.getElementById('board');
-//Создаем div для изначального расположения кораблей и поля вывода подсказок
-function createBoardShips() {
-  let boardShips = document.createElement('div');
-  boardGame.appendChild(boardShips);
-  boardShips.setAttribute('id', 'ship');
-}
-createBoardShips()
-
 game.boardShips = document.getElementById('ship');
-
-// создаем поле куда будем заносить корабли
-function createBattleBoard() {
-  let battleBoard = document.createElement('div');
-  boardGame.appendChild(battleBoard);
-  battleBoard.setAttribute('id', 'battleBoard');
-  battleBoard.style.width = '50%';
-  battleBoard.style.height = '70%';
-  battleBoard.style.top = '0';
-  battleBoard.style.border = '1px solid red';
-  battleBoard.style.boxSizing = 'border-box';
-  battleBoard.style.position = 'absolute';
-  // battleBoard.style.top = game.board.offsetTop + 'px';
-  // battleBoard.style.left = game.board.offsetLeft + 'px';
-}
-createBattleBoard()
-
 game.battleBoard = document.getElementById('battleBoard');
-if (game.board.offsetWidth < game.board.offsetHeight) {
-  game.sizeRow = Math.round(game.board.offsetWidth / 14);
-} else {
-  game.sizeRow = Math.round(game.board.offsetHeight / 14);
-}
+
+
 function namePlayer(value, name){
   value = document.createElement('span');
   value.style.width = '50%';
@@ -124,12 +375,9 @@ function namePlayer(value, name){
   let text = document.createElement('h3');
   text.textContent = name;
   value.appendChild(text);
-  text.style.verticalAlign = 'middle'
-  text.style.fontSize = '25px'
-
+  text.style.verticalAlign = 'middle';
+  text.style.fontSize = '25px';
 }
-namePlayer('player', 'player')
-namePlayer('computer', 'computer')
 
 // отрисовываем сетку 10х10
 function createBord(field) {
@@ -157,7 +405,7 @@ function createBord(field) {
   Letters(field)
 }
 createBord(game.board)
-createBord(game.boardShips)
+
 // отрисовываем сетку координат
 function Letters(field) {
   let firstLetter = field.getElementsByTagName('td');
@@ -175,39 +423,10 @@ function Letters(field) {
   }
 }
 
-//создаем поле подсказки
-function createInform() {
-  let help = document.createElement('div');
-  help.style.width = '100%';
-  help.style.marginTop = game.sizeRow * 1.5 + 'px';
-  help.setAttribute('id', 'help');
-  help.id = 'help';
-  game.boardShips.appendChild(help);
-  let textHelp = document.createElement('p');
-  help.appendChild(textHelp);
-  textHelp.style.margin = game.sizeRow + 'px';
-  textHelp.style.marginBottom = 0;
-
-  textHelp.style.fontSize = '15px';
-  textHelp.textContent = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Earum exercitationem numquam officia optio veritatis! Assumenda beatae cupiditate delectus enim illo, officia quae quos temporibus! Adipisci alias amet aut ducimus eius est eum fugit illum minus mollitia, perferendis, repellendus reprehenderit repudiandae suscipit voluptas? Alias animi cumque nam praesentium quam quasi voluptatem!'
-}
-createInform()
-
-function createHomeShips(){
-  let home = document.createElement('div');
-  game.boardShips.appendChild(home);
-  // home.style.top = help.getBoundingClientRect().bottom + 'px';
-  home.style.border = '1px solid green';
-  home.id = 'HomeShips';
-  home.style.position = 'relative';
-  home.style.height = 9 * game.sizeRow+ 'px';
-  home.style.width = '100%';
-}
-createHomeShips()
-
+game.homeShips = document.getElementById('homeShips')
 // показываем корабли
 function createShip(player, name) {
-  game.HomeShips = document.getElementById('HomeShips')
+  game.homeShips = document.getElementById('HomeShips')
   let posLeft = game.sizeRow;
   for (let shipType in player) {
     let countShip = player[shipType][0];
@@ -215,7 +434,7 @@ function createShip(player, name) {
     let posLeft = game.sizeRow;
     for (let i = 0; i < countShip; i++) {
       let ship = document.createElement('img');
-      game.HomeShips.appendChild(ship);
+      game.homeShips.appendChild(ship);
       ship.setAttribute('src', 'image/ship' + sizeShip + shipType + '.png');
       ship.style.height = game.sizeRow + 'px';
       ship.style.width = game.sizeRow * sizeShip + 'px';
@@ -231,76 +450,6 @@ function createShip(player, name) {
 }
 createShip(game.shipPlayer, 'player')
 
-
-//Отрисовываем главное изображение
-function dowloadImg() {
-  let img = document.createElement('img');
-  img.setAttribute('src', 'image/Battleship-High-Cop.jpg');
-  img.setAttribute('id', 'img');
-  img.style.width = '100%';
-  img.style.height = '100%';
-  img.style.zIndex = '10';
-  img.style.position = 'fixed';
-  boardGame.appendChild(img);
-  }
-dowloadImg()
-// создаем кнопку new game
-function createButtonGame() {
-  let buttonGame = document.createElement('input');
-  boardGame.appendChild(buttonGame);
-  buttonGame.setAttribute('type', 'button');
-  buttonGame.setAttribute('value', 'New game');
-  buttonGame.setAttribute('id', 'newGame');
-  buttonGame.setAttribute('onclick', 'newGame()');
-}
-createButtonGame()
-// создаем кнопку back
-function createButtonBack() {
-  let buttonBack = document.createElement('input');
-  boardGame.appendChild(buttonBack);
-  buttonBack.style.left = 0
-  buttonBack.setAttribute('type', 'button');
-  buttonBack.setAttribute('value', 'Back');
-  buttonBack.setAttribute('id', 'back');
-  buttonBack.setAttribute('onclick', 'back()');
-}
-createButtonBack()
-let buttonBack = document.getElementById('back')
-// создаем кнопку play
-function createButtonPlay() {
-  let buttonPlay = document.createElement('input');
-  boardGame.appendChild(buttonPlay);
-  buttonPlay.style.display = 'block';
-  buttonPlay.setAttribute('type', 'button');
-  buttonPlay.setAttribute('value', 'Play');
-  buttonPlay.setAttribute('id', 'play');
-  buttonPlay.setAttribute('onclick', 'play()');
-}
-// создаем кнопку Update
-function createButtonUpdate() {
-  let buttonUpdate = document.createElement('input');
-  game.battleBoard.appendChild(buttonUpdate);
-  buttonUpdate.setAttribute('type', 'button');
-  buttonUpdate.setAttribute('value', 'Update');
-  buttonUpdate.setAttribute('onclick', 'Update()');
-  buttonUpdate.setAttribute('id', 'Update');
-  // buttonUpdate.style.right = buttonUpdate.offsetHeight / 2 + 'px'
-  // buttonUpdate.style.bottom = buttonUpdate.offsetHeight / 2 + 'px'
-  buttonUpdate.style.position = 'absolute';
-}
-createButtonUpdate()
-
-// Создание кнопки random
-function createButtonRandom(){
-  let buttonRandom = document.createElement('input');
-  game.battleBoard.appendChild(buttonRandom);
-  buttonRandom.style.right = 0
-  buttonRandom.setAttribute('type', 'button');
-  buttonRandom.setAttribute('value', 'Random');
-  buttonRandom.id = 'Random';
-  buttonRandom.setAttribute('onclick', 'Random(game.battleBoard, game.randomPlayer, "player")');
-}
-createButtonRandom()
 
 //создание выстрела
 document.addEventListener('click', startBattle, false);
@@ -335,49 +484,14 @@ function NeutralCell(EO) {
     }
   }
 }
+//--------------------------------------------------------
 
-function Cancle(){
-  let modal = document.getElementById('modal');
-  modal.style.display = 'none';
-}
-function Modal(){
-  let modal = document.getElementById('modal');
-  switchToList({page: 'second'});
-  game.HomeShips.remove();
-  Update()
-  modal.style.display = 'none';
-}
+//--------------------------------------------------------------
 let table = document.getElementById('boardTab');
 let tablePosition = table.getBoundingClientRect();
 
-function createTotal(){
-  let total = document.createElement('div');
-  total.id= 'total';
-  total.style.width= '100%';
-  total.style.height= '10%';
-  total.style.textAlign = 'center';
-  total.style.border = '1px solid blue';
-  total.style.position = 'absolute';
-  total.style.top = game.boardShips.offsetHeight + game.boardShips.offsetTop +'px';
-  boardGame.appendChild(total);
-}
-createTotal()
-function totalPl(gamer, name){
-  gamer = document.createElement('h4');
-  gamer.style.position = 'absolute';
-  gamer.style.margin= '10px';
-  gamer.style.fontSize = '25px';
-  if(name == 'player'){
-    gamer.style.left = '15%'
-    gamer.textContent = 'player';
-  } else{
-    gamer.style.right= '15%';
-    gamer.textContent = 'computer'
-  }
-  document.getElementById('total').appendChild(gamer)
-}
-totalPl('human','player');
-totalPl('machine','computer');
+
+
 // function createShips() { // отрисовываем корабли
 //   for (let i = 0; i < game.ship.length; i++) {
 //     let posLeft = game.sizeRow
@@ -562,25 +676,25 @@ pullImage()
 //---------------------------------------------------------------
 
 function squareBusy(activeShip) {
-    if (activeShip.style.transform === '') {
-      for (let n = 0; n < Math.round(activeShip.offsetWidth / 10) * 10 / (Math.round(game.sizeRow / 10) * 10); n++) {
-        let squareX = Math.ceil((activeShip.offsetLeft - tablePosition.left) / game.sizeRow);
-        let squareY = Math.ceil((activeShip.offsetTop - tablePosition.top) / game.sizeRow)
-        squareX += n;
-        if(activeShip.parentElement.id == 'battleBoard'){
-          game.busy.push([squareX, squareY])
-        }
-      }
-    } else {
-      for (let n = 0; n < Math.round(activeShip.offsetWidth / 10) * 10 / (Math.round(game.sizeRow / 10) * 10); n++) {
-        let squareX = Math.floor((activeShip.offsetLeft - tablePosition.left) / game.sizeRow);
-        let squareY = Math.ceil((activeShip.offsetTop - tablePosition.top) / game.sizeRow);
-        squareY += n;
-        if(activeShip.parentElement.id == 'battleBoard'){
-          game.busy.push([squareX, squareY])
-        }
+  if (activeShip.style.transform === '') {
+    for (let n = 0; n < Math.round(activeShip.offsetWidth / 10) * 10 / (Math.round(game.sizeRow / 10) * 10); n++) {
+      let squareX = Math.ceil((activeShip.offsetLeft - tablePosition.left) / game.sizeRow);
+      let squareY = Math.ceil((activeShip.offsetTop - tablePosition.top) / game.sizeRow)
+      squareX += n;
+      if (activeShip.parentElement.id == 'battleBoard') {
+        game.busy.push([squareX, squareY])
       }
     }
+  } else {
+    for (let n = 0; n < Math.round(activeShip.offsetWidth / 10) * 10 / (Math.round(game.sizeRow / 10) * 10); n++) {
+      let squareX = Math.floor((activeShip.offsetLeft - tablePosition.left) / game.sizeRow);
+      let squareY = Math.ceil((activeShip.offsetTop - tablePosition.top) / game.sizeRow);
+      squareY += n;
+      if (activeShip.parentElement.id == 'battleBoard') {
+        game.busy.push([squareX, squareY])
+      }
+    }
+  }
 }
 // -------------------------------------------------------------
 
@@ -605,58 +719,25 @@ function Rotate(EO) {
 
 
 function Update() {
-  game.HomeShips.remove();
-  game.battleBoard.remove();
-  createHomeShips();
-  createShip(game.shipPlayer, 'player');
-  createBattleBoard();
-  game.battleBoard = document.getElementById('battleBoard');
-  createButtonUpdate();
-  createButtonRandom();
+  let ship = document.getElementsByClassName('player');
+  for(let i =0; i< ship.length; i++){
+    ship[i].remove()
+  }
+  // HomeShips.remove();
+  // battleBoard.remove();
+  // createHomeShips();
+  // createShip(game.shipPlayer, 'player');
+  // createBattleBoard();
+  // createButtonUpdate();
+  // createButtonRandom();
 }
 // Update()
-function Random(field, bus, name) {
- bus=[];
-  let table = document.getElementsByTagName('table');
-  let ship = document.querySelectorAll('.'+name+'');
-  let posRanShipX;
-  let posRanShipY;
-  for (let i = 0; i < ship.length; i++) {
-    ship[i].style.transformOrigin = '0 0';
-    let vertical = (game.random(1) == 1) ? (ship[i].style.transform = 'rotate(90deg)') : (ship[i].style.transform = '')
-    field.appendChild(ship[i]);
-    if (!ship[i].style.transform) {
-      posRanShipX = game.random(9 - Math.floor(ship[i].offsetWidth) / Math.round(game.sizeRow));
-      posRanShipY = game.random(9);
-      ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow + 'px';
-      ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
-      for (let p = 1; p <= Math.round(ship[i].offsetWidth / 10) * 10 / (Math.round(game.sizeRow / 10) * 10); p++) {
-        bus.push([posRanShipX + p, posRanShipY + 1]);
-      }
-    } else {
-      posRanShipX = game.random(9);
-      posRanShipY = game.random(9 - Math.floor(ship[i].offsetWidth) / Math.round(game.sizeRow));
-      ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow * 2 + 'px';
-      ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
-      for (let p = 1; p <= Math.round(ship[i].offsetWidth / 10) * 10 / (Math.round(game.sizeRow / 10) * 10); p++) {
-        bus.push([posRanShipX + 1, posRanShipY + 1]);
-      }
-    }
-  }
-}
 
-function winner(){
-let anim = document.createElement('img');
-anim.src = '../youwin.gif';
-  anim.style.position = 'absolute';
-  anim.id = 'winner';
-  anim.style.display = 'block';
-  anim.style.left = '50%';
-  anim.style.transform = 'translate(-50%, 0)' ;
-  boardGame.appendChild(anim)
-}
+
 
 
 // создать дистанцию кораблей
 // отработать поподания по кораблям
 // создать рандомную расстановку кораблей
+
+
