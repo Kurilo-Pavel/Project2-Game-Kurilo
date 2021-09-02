@@ -35,8 +35,9 @@ buttonNewGame.show()
       boardShips.hide()
       buttonPlay.hide()
       buttonRandom.hide()
-      buttonUpdate.hide()
+      // buttonUpdate.hide()
       battle.hide()
+        buttonRezult.show()
       break;
     case 'second':
       inform.show()
@@ -44,16 +45,25 @@ buttonNewGame.show()
       boardShips.show()
       buttonBack.show()
       buttonRandom.show()
-      buttonUpdate.show()
+      // buttonUpdate.show()
       battle.show()
-      buttonPlay.show()
+      buttonPlay.hide()
       firstImg.hide()
       total.hide()
       buttonNewGame.hide()
-
+      buttonRezult.hide()
+      HomeShips.style.height = 9*game.sizeRow + 'px'
       for (let i = 0; i < computerShip.length; i++) {
         computerShip[i].style.display = 'none';
       }
+      let name = document.querySelectorAll('.Name')
+      for(let i=0; i<name.length;i++){
+        name[i].remove()
+      }
+      battleBoard.style.zIndex=2;
+      if(document.getElementById('shipTab')){
+      document.getElementById('shipTab').remove()}
+
       break;
     case 'third':
       battleBoard.style.zIndex = '-1'
@@ -61,21 +71,12 @@ buttonNewGame.show()
       total.show()
       firstImg.hide()
       buttonRandom.hide()
-      buttonUpdate.hide()
       buttonPlay.hide()
       buttonNewGame.hide()
+      buttonRezult.hide()
       HomeShips.style.height = board.offsetHeight+'px'
-      console.log(HomeShips.style.height)
-      createBord(game.boardShips)
-      namePlayer('player', 'player')
-      namePlayer('computer', 'computer')
-      for (let i = 0; i < computerShip.length; i++) {
-        if (computerShip[i].style.display === 'none') {
-          computerShip[i].style.display = 'block';
-        }
-      }
-
-      break;
+      shipTab.style.zIndex = '2';
+            break;
   }
 }
 
