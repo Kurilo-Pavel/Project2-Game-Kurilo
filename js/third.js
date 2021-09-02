@@ -83,7 +83,7 @@ function LockGetReady(ResultH) {
         Player = [];
     }
     var PlayerName = document.getElementById('name').value;
-    Player.push({name: PlayerName, winner: game.winner, losing: game.losing});
+    Player.push({name: PlayerName, winner: game.rezultPl.winner, losing: game.rezultPl.losing});
     if (Player.length > 10)
       Player = Player.slice(Player.length - 10);
     ShowMessages();

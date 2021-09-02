@@ -13,8 +13,7 @@ let game = {
   homeShips: null,
   randomPlayer: [], // массив расположения кораблей игрока
   randomComputer: [], // массив расположения кораблей компьютера
-  winner: 0, // счет побед игрока
-  losing: 0, // счет побед компьютера || проигрышей игрока
+  rezultPl:  {name: null, winner: 3, losing: 1}, // счет
   shotComputer: [[0,0]], // массив выстрелов
   random(n){
     return Math.floor(Math.random()*(n+1))
@@ -341,13 +340,30 @@ function okRez(){
 }
 function ok() {
   if (fName.selector.value.length >= 5) {
-    modalWind.hide()
-    switchToList({page: 'second'});
-    SendMessage()
+    modalWind.hide();
+     switchToList({page: 'second'});
+    let name = document.getElementById('name')
+    game.rezultPl.name = name.value;
+    locStorage()
+    // SendMessage()
   } else {
     alert('Имя должно содержать болеше 4 символов!!!')
   }
 }
+
+function locStorage(){
+  let name = document.getElementById('name')
+  let keyShip = JSON.stringify(name.value);
+  for (let i=0; i< localStorage.length;i++){
+    if (JSON.parse(localStorage.key(i)) == name.value){
+      game.rezultPl.winner += JSON.parse(localStorage.getItem(keyShip)).winner;
+      game.rezultPl.losing += JSON.parse(localStorage.getItem(keyShip)).losing;
+    }
+  }
+  localStorage.setItem(keyShip, JSON.stringify(game.rezultPl));
+// localStorage.clear();
+}
+
 function back() {
   let statePage = JSON.parse(decodeURIComponent(location.hash.substr(1))).page;
   if (statePage == 'second') {
@@ -382,37 +398,37 @@ function random(field, name) {
     // pos(ship[i], search)
 
 
-let post = pos(ship[i], search)
+const {posRanShipX, posRanShipY} = pos(ship[i], search);
     if (!ship[i].style.transform) {
-      ship[i].style.left = table[0].getBoundingClientRect().left + post.posRanShipX * game.sizeRow + game.sizeRow + 'px';
-      ship[i].style.top = table[0].getBoundingClientRect().top + post.posRanShipY * game.sizeRow + game.sizeRow + 'px';
+      ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow + 'px';
+      ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
       for (let p = 0; p < Math.round(ship[i].offsetWidth / game.sizeRow); p++) {
-        search.push([post.posRanShipX + p, post.posRanShipY].toString());
-        search.push([post.posRanShipX + p, post.posRanShipY + 1].toString());
-        search.push([post.posRanShipX + p, post.posRanShipY + 2].toString());
-        search.push([post.posRanShipX + p + 1, post.posRanShipY].toString());
-        search.push([post.posRanShipX + p + 1, post.posRanShipY + 1].toString());
-        search.push([post.posRanShipX + p + 1, post.posRanShipY + 2].toString());
-        search.push([post.posRanShipX + p + 2,post.posRanShipY].toString());
-        search.push([post.posRanShipX + p + 2, post.posRanShipY + 1].toString());
-        search.push([post.posRanShipX + p + 2, post.posRanShipY + 2].toString());
+        search.push([posRanShipX + p, posRanShipY].toString());
+        search.push([posRanShipX + p, posRanShipY + 1].toString());
+        search.push([posRanShipX + p, posRanShipY + 2].toString());
+        search.push([posRanShipX + p + 1, posRanShipY].toString());
+        search.push([posRanShipX + p + 1, posRanShipY + 1].toString());
+        search.push([posRanShipX + p + 1, posRanShipY + 2].toString());
+        search.push([posRanShipX + p + 2,posRanShipY].toString());
+        search.push([posRanShipX + p + 2, posRanShipY + 1].toString());
+        search.push([posRanShipX + p + 2, posRanShipY + 2].toString());
 
         field.appendChild(ship[i]);
 
       }
     } else {
-      ship[i].style.left = table[0].getBoundingClientRect().left + post.posRanShipY * game.sizeRow + game.sizeRow * 2 + 'px';
-      ship[i].style.top = table[0].getBoundingClientRect().top + post.posRanShipX * game.sizeRow + game.sizeRow + 'px';
+      ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipY * game.sizeRow + game.sizeRow * 2 + 'px';
+      ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipX * game.sizeRow + game.sizeRow + 'px';
       for (let p = 0; p < Math.round(ship[i].offsetWidth / game.sizeRow); p++) {
-        search.push([post.posRanShipY, post.posRanShipX + p].toString());
-        search.push([post.posRanShipY, post.posRanShipX + p + 1].toString());
-        search.push([post.posRanShipY, post.posRanShipX + p + 2].toString());
-        search.push([post.posRanShipY + 1, post.posRanShipX + p].toString());
-        search.push([post.posRanShipY + 1, post.posRanShipX + p + 1].toString());
-        search.push([post.posRanShipY + 1, post.posRanShipX + p + 2].toString());
-        search.push([post.posRanShipY + 2, post.posRanShipX + p].toString());
-        search.push([post.posRanShipY + 2, post.posRanShipX + p + 1].toString());
-        search.push([post.posRanShipY + 2, post.posRanShipX + p + 2].toString());
+        search.push([posRanShipY, posRanShipX + p].toString());
+        search.push([posRanShipY, posRanShipX + p + 1].toString());
+        search.push([posRanShipY, posRanShipX + p + 2].toString());
+        search.push([posRanShipY + 1, posRanShipX + p].toString());
+        search.push([posRanShipY + 1, posRanShipX + p + 1].toString());
+        search.push([posRanShipY + 1, posRanShipX + p + 2].toString());
+        search.push([posRanShipY + 2, posRanShipX + p].toString());
+        search.push([posRanShipY + 2, posRanShipX + p + 1].toString());
+        search.push([posRanShipY + 2, posRanShipX + p + 2].toString());
 
         field.appendChild(ship[i]);
 
@@ -421,29 +437,27 @@ let post = pos(ship[i], search)
   }
 }
 
-function pos(sh, sea) {
+function pos(sh,sea) {
 
   let posRanShipX = game.random(9 - Math.floor(sh.offsetWidth) / Math.round(game.sizeRow));
   let posRanShipY = game.random(9);
   if (!sh.style.transform) {
     if (sea.indexOf([(posRanShipX + 1), (posRanShipY + 1)].toString()) !== -1) {
-      console.log('aaaaaaaaaaaaaaaaaaaaa')
-      pos(sh, sea)
+      console.log('aaaaaaaaaaaaaaaaaaaaa');
+      pos(sh, sea);
     } else {
-      console.log(sea.indexOf([(posRanShipX + 1), (posRanShipY + 1)].toString()))
-      console.log((posRanShipX + 1) + '/' + (posRanShipY + 1))
-      return {posRanShipX: posRanShipX, posRanShipY: posRanShipY}
-
+      console.log(sea.indexOf([(posRanShipX + 1), (posRanShipY + 1)].toString()));
+      console.log((posRanShipX + 1) + '/' + (posRanShipY + 1));
+      return {posRanShipX, posRanShipY};
     }
   } else {
     if (sea.indexOf([(posRanShipY + 1), (posRanShipX + 1)].toString()) !== -1) {
-      console.log('aaaaaaaaaaaaaaaaaaaaa')
-      pos(sh, sea)
+      console.log('aaaaaaaaaaaaaaaaaaaaa');
+      pos(sh, sea);
     } else {
-
-      console.log(sea.indexOf([(posRanShipY + 1), (posRanShipX + 1)].toString()))
-      console.log((posRanShipY + 1) + '/' + (posRanShipX + 1))
-      return {posRanShipX: posRanShipX, posRanShipY: posRanShipY}
+      console.log(sea.indexOf([(posRanShipY + 1), (posRanShipX + 1)].toString()));
+      console.log((posRanShipY + 1) + '/' + (posRanShipX + 1));
+      return {posRanShipX, posRanShipY};
     }
 
   }
@@ -477,9 +491,6 @@ function pos(sh, sea) {
     //   else{tab.rows[search[m][1]].cells[search[m][0]].style.background = 'red';
     // }
     // }
-
-
-
 
 
 function showShipComputer(){
@@ -627,9 +638,10 @@ function NeutralCell(EO) {
   if (EO.target.tagName == 'TD') {
     EO.preventDefault();
     let cellImg = EO.target;
-    if (cellImg.style.background == '') {
+    if ( cellImg.style.background == '' && cellImg.style.background != 'black' &&  cellImg.style.background != 'green') {
       cellImg.style.background = 'orange';
-    } else {
+    }
+    else if (cellImg.style.background == 'orange') {
       cellImg.style.background = '';
     }
   }
