@@ -28,16 +28,18 @@ function renderNewList() {
   switch (state.page) {
     case 'first':
       firstImg.show()
-buttonNewGame.show()
+      buttonNewGame.show()
+      buttonRezult.show()
       total.hide()
       buttonBack.hide()
       boardPlayer.hide()
       boardShips.hide()
       buttonPlay.hide()
       buttonRandom.hide()
+        winner.hide()
       // buttonUpdate.hide()
       battle.hide()
-        buttonRezult.show()
+
       break;
     case 'second':
       inform.show()
@@ -52,6 +54,7 @@ buttonNewGame.show()
       total.hide()
       buttonNewGame.hide()
       buttonRezult.hide()
+        winner.hide()
       HomeShips.style.height = 9*game.sizeRow + 'px'
       for (let i = 0; i < computerShip.length; i++) {
         computerShip[i].style.display = 'none';
@@ -67,13 +70,15 @@ buttonNewGame.show()
       break;
     case 'third':
       battleBoard.style.zIndex = '-1'
-      inform.hide()
       total.show()
+      inform.hide()
+      winner.hide()
       firstImg.hide()
       buttonRandom.hide()
       buttonPlay.hide()
       buttonNewGame.hide()
       buttonRezult.hide()
+      butRepeat.show()
       HomeShips.style.height = board.offsetHeight+'px'
       shipTab.style.zIndex = '2';
             break;

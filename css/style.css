@@ -19,8 +19,7 @@ div{
   position: absolute;
   margin: 0;
   width: 50%;
-  height: 70%;
-  border: 1px black solid;
+  height: 80%;
 }
 #ship{
   right: 0;

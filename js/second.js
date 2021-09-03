@@ -2,9 +2,10 @@
 let game = {
   size: 11, // число строк || столбцов
   sizeRow: null, // размер ячейки
-  computerName:['Капитан', 'Матроскин', 'Пират', 'Профи', 'Новичок', 'Русалка', 'Гарри'],
+  computerName: ['Капитан', 'Матроскин', 'Пират', 'Профи', 'Новичок', 'Русалка', 'Гарри'],
   shipPlayer: {Small: [4, 1], Medium: [3, 2], Big: [2, 3], Huge: [1, 4]},
   shipComputer: {Small: [4, 1], Medium: [3, 2], Big: [2, 3], Huge: [1, 4]},
+  losingText: ['Проигрыш', 'Печалька', 'Вы проиграли', 'Не в этот раз', 'Попробуйте еще раз', 'Вам не повезло', 'Ты сдул'],
   rowNumber: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   colLetter: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
   board: null,
@@ -13,12 +14,17 @@ let game = {
   homeShips: null,
   randomPlayer: [], // массив расположения кораблей игрока
   randomComputer: [], // массив расположения кораблей компьютера
-  rezultPl:  {name: null, winner: 3, losing: 1}, // счет
-  shotComputer: [[0,0]], // массив выстрелов
+  playerShot: [], // массив выстрелов игрока
+  computerShot: [], // массив выстрелов компьютера
+  rezultPl: {name: null, winner: 0, losing: 0}, // счет
+  hitPlayer: 0,
+  hitComputer: 0,
+
   random(n){
     return Math.floor(Math.random()*(n+1))
   }
 }
+
 let boardGame = document.getElementById('boardGame');
 //------------------------------------------------
 class Element{
@@ -83,6 +89,7 @@ const modalRezult = new Field({
   top: '50%',
   transform: 'translate(-50%, -50%)',
   textAlign: 'center',
+  fontSize: '20px',
   border: '2px solid white',
   display: 'none'
 })
@@ -135,6 +142,7 @@ const buttonRezult = new Button({
   type: 'button',
   right: '5%',
   zIndex: '2',
+  fontSize: '30px',
   onclick: rezult
 })
 const okRezult = new Button({ //кнопка Отмена
@@ -144,8 +152,9 @@ const okRezult = new Button({ //кнопка Отмена
   position: 'absolute',
   type: 'button',
   value: 'OK',
-  fontSize: '13px',
+  fontSize: '17px',
   bottom: '0px',
+  transform: 'translate(-50%, 0)',
   onclick: okRez
 })
 const butOk = new  Button({ // кнопка ОК
@@ -155,7 +164,7 @@ const butOk = new  Button({ // кнопка ОК
   position: 'relative',
   type: 'button',
   value: 'Ok',
-  fontSize: '13px',
+  fontSize: '17px',
   onclick: ok,
 
 })
@@ -166,8 +175,20 @@ const butCancle = new Button({ //кнопка Отмена
   position: 'relative',
   type: 'button',
   value: 'Cancle',
-  fontSize: '13px',
+  fontSize: '17px',
   onclick: cancle
+})
+const butRepeat = new Button({ //кнопка повтора
+  parent: 'boardGame',
+  selector: 'input',
+  id: 'Repeat',
+  right: '5%',
+  position: 'absolute',
+  type: 'button',
+  value: 'Повторить',
+  fontSize: '30px',
+  display: 'none',
+  onclick: repeat
 })
 const boardPlayer = new Field({ // поле игрока
   parent: 'boardGame',
@@ -189,9 +210,9 @@ const battle = new Field({ // поле куда заносим корабли
   selector: 'div',
   id: 'battleBoard',
   width: '50%',
-  height: '70%',
+  height: '80%',
   top: '0',
-  border: '1px solid red',
+  // border: '1px solid red',
   position: 'absolute',
   boxSizing: 'border-box'//???????????????
 })
@@ -220,7 +241,7 @@ const homeShips = new Field({
   parent: 'ship',
   selector: 'div',
   id: 'HomeShips',
-  border: '1px solid green',
+  // border: '1px solid green',
   position: 'absolute',
   // height: 9*game.sizeRow + 'px',
   width: '100%',
@@ -247,6 +268,7 @@ const buttonNewGame = new Button({ //кнопка New game
   id: 'newGame',
   value: 'New game',
   type: 'button',
+  fontSize: '30px',
   onclick: newGame
 })
 const buttonBack = new Button({ //кнопка Back
@@ -255,24 +277,16 @@ const buttonBack = new Button({ //кнопка Back
   id: 'back',
   value: 'Back',
   type: 'button',
+  fontSize: '30px',
   onclick: back
 })
-// const buttonUpdate = new Button({ //кнопка Update
-//   parent: 'battleBoard',
-//   selector: 'input',
-//   id: 'update',
-//   value: 'Update',
-//   type: 'button',
-//   onclick: Update,
-//   position: 'absolute',
-//   right: '5%'
-// })
 const buttonPlay = new Button({ //кнопка Play
   parent: 'boardGame',
   selector: 'input',
   id: 'play',
   value: 'Play',
   type: 'button',
+  fontSize: '30px',
   onclick: play,
 
 })
@@ -282,6 +296,7 @@ const buttonRandom = new Button({ //кнопка Random
   id: 'Random',
   value: 'Random',
   type: 'button',
+  fontSize: '30px',
   onclick: wrapperRandom,//???????????????????????
   position: 'absolute'
 })
@@ -293,44 +308,50 @@ const total = new Field({
   height: '10%',
   top: boardPlayer.selector.offsetHeight + 'px',
   textAlign: 'center',
-  dorder: '1px solid blue',
-  position: 'absolute'
+  // dorder: '1px solid blue',
+  position: 'absolute',
+  fontSize: 40
 })
-// const winner = new Img({
-//   parent: 'boardGame',
-//   selector: 'img',
-//   id: 'winner',
-//   position: 'absolute',
-//   left: '50%',
-//   transform: 'translate(-50%, 0)',
-//   src: '../youwin.gif',
-//   display: 'none'
-// })
+const winner = new Img({
+  parent: 'boardGame',
+  selector: 'img',
+  id: 'winner',
+  zIndex: '50',
+  position: 'absolute',
+  left: '50%',
+  transform: 'translate(-50%, 0)',
+  src: 'image/youwin.gif',
+  display: 'none'
+})
 const totalPlayer = new TextModal({
   parent: 'total',
   selector: 'h4',
+  id: 'playerShot',
   margin: '10px',
-  fontSize: '25px',
+  fontSize: '20px',
   position: 'absolute',
-  left: '15%',
-  textContent: 'player'
+  left: '5%',
+  textContent: ''
 })
 const totalComputer = new TextModal({
   parent: 'total',
   selector: 'h4',
+  id: 'computerShot',
   margin: '10px',
-  fontSize: '25px',
+  fontSize: '20px',
   position: 'absolute',
-  right: '15%',
-  textContent: 'computer'
+  right: '5%',
+  textContent: ''
 })
-
 //------------------------------------------------
 function newGame(){
   modalWind.show()
 }
 function rezult(){
-  modalRezult.show()
+  let modalRez = document.getElementById('modalRez');
+  if(modalRez.style.display == 'none'){
+    modalRezult.show()
+  }else{  modalRezult.hide()}
 }
 function cancle(){
   modalWind.hide()
@@ -338,6 +359,8 @@ function cancle(){
 function okRez(){
   modalRezult.hide()
 }
+function repeat(){
+  }
 function ok() {
   if (fName.selector.value.length >= 5) {
     modalWind.hide();
@@ -346,11 +369,11 @@ function ok() {
     game.rezultPl.name = name.value;
     locStorage()
     // SendMessage()
+    insertData()
   } else {
     alert('Имя должно содержать болеше 4 символов!!!')
   }
 }
-
 function locStorage(){
   let name = document.getElementById('name')
   let keyShip = JSON.stringify(name.value);
@@ -363,7 +386,6 @@ function locStorage(){
   localStorage.setItem(keyShip, JSON.stringify(game.rezultPl));
 // localStorage.clear();
 }
-
 function back() {
   let statePage = JSON.parse(decodeURIComponent(location.hash.substr(1))).page;
   if (statePage == 'second') {
@@ -371,128 +393,171 @@ function back() {
   } else {
     switchToList({page: 'second'});
   }
-
 }
 function play() {
   switchToList({page: 'third'});
   namePlayer('player', 'player');
   namePlayer('computer', 'computer');
   createBord(game.boardShips);
-  showShipComputer()
-  random(HomeShips, 'computer');
+  showShipComputer();
+ seach2(HomeShips, 'computer');
   squareBusy(seach('computer'),'HomeShips',game.randomComputer)
   playComputer();
-  console.log(game.shotComputer)
-  console.log(game.randomPlayer)
-  console.log(game.randomComputer)
 }
 //////////////////////////////////////////////////////////////////////
-function random(field, name) {
-  let search = [[]];
-  let ship = document.querySelectorAll('.' + name + '');
-  let table = document.getElementsByTagName('table');
-  for (let i = 0; i < ship.length; i++) {
-    ship[i].style.transformOrigin = '0 0';
-    (game.random(1) === 1) ? (ship[i].style.transform = 'rotate(90deg)') : (ship[i].style.transform = '')
-
-    // pos(ship[i], search)
-
-
-const {posRanShipX, posRanShipY} = pos(ship[i], search);
-    if (!ship[i].style.transform) {
-      ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow + 'px';
-      ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
-      for (let p = 0; p < Math.round(ship[i].offsetWidth / game.sizeRow); p++) {
-        search.push([posRanShipX + p, posRanShipY].toString());
-        search.push([posRanShipX + p, posRanShipY + 1].toString());
-        search.push([posRanShipX + p, posRanShipY + 2].toString());
-        search.push([posRanShipX + p + 1, posRanShipY].toString());
-        search.push([posRanShipX + p + 1, posRanShipY + 1].toString());
-        search.push([posRanShipX + p + 1, posRanShipY + 2].toString());
-        search.push([posRanShipX + p + 2,posRanShipY].toString());
-        search.push([posRanShipX + p + 2, posRanShipY + 1].toString());
-        search.push([posRanShipX + p + 2, posRanShipY + 2].toString());
-
-        field.appendChild(ship[i]);
-
-      }
-    } else {
-      ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipY * game.sizeRow + game.sizeRow * 2 + 'px';
-      ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipX * game.sizeRow + game.sizeRow + 'px';
-      for (let p = 0; p < Math.round(ship[i].offsetWidth / game.sizeRow); p++) {
-        search.push([posRanShipY, posRanShipX + p].toString());
-        search.push([posRanShipY, posRanShipX + p + 1].toString());
-        search.push([posRanShipY, posRanShipX + p + 2].toString());
-        search.push([posRanShipY + 1, posRanShipX + p].toString());
-        search.push([posRanShipY + 1, posRanShipX + p + 1].toString());
-        search.push([posRanShipY + 1, posRanShipX + p + 2].toString());
-        search.push([posRanShipY + 2, posRanShipX + p].toString());
-        search.push([posRanShipY + 2, posRanShipX + p + 1].toString());
-        search.push([posRanShipY + 2, posRanShipX + p + 2].toString());
-
-        field.appendChild(ship[i]);
-
-      }
-    }console.log(search)
-  }
+function Round(n,m){
+  return Math.floor(Math.random()*(m-n+1))+n;
 }
 
-function pos(sh,sea) {
+function pos2(ob,field,name) {
+  let tablet = document.getElementsByTagName('table');
 
-  let posRanShipX = game.random(9 - Math.floor(sh.offsetWidth) / Math.round(game.sizeRow));
-  let posRanShipY = game.random(9);
-  if (!sh.style.transform) {
-    if (sea.indexOf([(posRanShipX + 1), (posRanShipY + 1)].toString()) !== -1) {
-      console.log('aaaaaaaaaaaaaaaaaaaaa');
-      pos(sh, sea);
-    } else {
-      console.log(sea.indexOf([(posRanShipX + 1), (posRanShipY + 1)].toString()));
-      console.log((posRanShipX + 1) + '/' + (posRanShipY + 1));
-      return {posRanShipX, posRanShipY};
-    }
+  ob.style.transformOrigin = '0 0';
+  (game.random(1) === 1) ? (ob.style.transform = 'rotate(90deg)') : (ob.style.transform = '');
+  let  posRanShipX = Round(1,10 - Math.floor(ob.offsetWidth) / Math.round(game.sizeRow));
+ let posRanShipY = Round(0,9);
+
+  if (field.lastElementChild.tagName != 'IMG') {
+    field.appendChild(ob);
   } else {
-    if (sea.indexOf([(posRanShipY + 1), (posRanShipX + 1)].toString()) !== -1) {
-      console.log('aaaaaaaaaaaaaaaaaaaaa');
-      pos(sh, sea);
-    } else {
-      console.log(sea.indexOf([(posRanShipY + 1), (posRanShipX + 1)].toString()));
-      console.log((posRanShipY + 1) + '/' + (posRanShipX + 1));
-      return {posRanShipX, posRanShipY};
-    }
+    let shipBoard = document.querySelectorAll('.' + name + '');
+    for (let n = 0; n < shipBoard.length; n++) {
+      if (shipBoard[n].offsetParent === field) {
+        if (!ob.style.transform) {
+           posRanShipX = Round(1,10 - Math.floor(ob.offsetWidth) / Math.round(game.sizeRow));
+           posRanShipY = Round(0,9);
+          ob.style.left = tablet[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow + 'px';
+          ob.style.top = tablet[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
+          let x = ob.style.left.slice(0,-2);
+          let y = ob.style.top.slice(0,-2);
+          if ((shipBoard[n].offsetLeft - game.sizeRow) < x &&
+              (shipBoard[n].offsetLeft + shipBoard[n].offsetWidth + game.sizeRow) > x &&
+              (shipBoard[n].offsetTop - game.sizeRow) < y &&
+              (shipBoard[n].offsetTop + shipBoard[n].offsetHeight + game.sizeRow) > y) {
 
+            pos2(ob,field,name);
+          }
+        } else {
+           posRanShipX = Round(0,9);
+           posRanShipY = Round(1,10 - Math.floor(ob.offsetWidth) / Math.round(game.sizeRow));
+          ob.style.left = tablet[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow + 'px';
+          ob.style.top = tablet[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
+          let x = ob.style.left.slice(0,-2);
+          let y = ob.style.top.slice(0,-2);
+
+            if ((shipBoard[n].offsetLeft - game.sizeRow) < y &&
+                (shipBoard[n].offsetLeft + shipBoard[n].offsetWidth + game.sizeRow) > y &&
+                (shipBoard[n].offsetTop - game.sizeRow) < x &&
+                (shipBoard[n].offsetTop + shipBoard[n].offsetHeight + game.sizeRow) > x) {
+              pos2(ob,field,name);
+            }
+          }
+        }
+
+      }
+
+  }return{posRanShipX,posRanShipY}
+}
+function seach2(field, name){
+  let ship = document.querySelectorAll('.' + name + '');
+  let tablet = document.getElementsByTagName('table');
+  for (let i = 0; i < ship.length; i++) {
+    let{posRanShipX,posRanShipY} = pos2(ship[i],field,name);
+    ship[i].style.left = tablet[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow + 'px';
+    ship[i].style.top = tablet[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
+    field.appendChild(ship[i]);
   }
 }
-
-
-
+//
+//
+//
 // function pos(sh,sea) {
-//   console.log(sea)
+//
 //   let posRanShipX = game.random(9 - Math.floor(sh.offsetWidth) / Math.round(game.sizeRow));
 //   let posRanShipY = game.random(9);
-//   for (let s = 0; s < sea.length; s++) {
-//     if ((posRanShipX + 1) === sea[s][0] && (posRanShipY + 1) === sea[s][1]) {
-//       console.log('aaaaaaaaaaaaaaaaaaaaaaaa')
-//       pos(sh,sea)
-//     } else{
-//       return {posRanShipX: posRanShipX, posRanShipY: posRanShipY}
+//   console.log(sea)
+//   if (!sh.style.transform) {
+//     if (sea.indexOf([(posRanShipX + 1), (posRanShipY + 1)].toString()) !== -1) {
+//       console.log('aaaaaaaaaaaaaaaaaaaaa');
+//       pos(sh, sea);
+//     } else {
+//       console.log(posRanShipY)
+//       console.log(posRanShipX)
+//       return {posRanShipX,posRanShipY};
+//     }
+//   } else {
+//     if (sea.indexOf([(posRanShipY + 1), (posRanShipX + 1)].toString()) !== -1) {
+//       console.log('aaaaaaaaaaaaaaaaaaaaa');
+//       pos(sh, sea);
+//     } else {
+//       console.log(posRanShipY)
+//       console.log(posRanShipX)
+//       return {posRanShipX,posRanShipY};
 //     }
 //   }
 // }
-    // let tab = document.getElementById('boardTab')
-    // for(let m = 0; m<search.length;m++){
-    //   if(search[m][0]==1 ){
-    //     tab.rows[search[m][1]].cells[(search[m][0])-1].style.background = 'red';
-    //
-    //   }
-    //   if(search[m][1]==1){
-    //     tab.rows[(search[m][1])+1].cells[search[m][0]].style.background = 'red';
-    //
-    //   }
-    //   else{tab.rows[search[m][1]].cells[search[m][0]].style.background = 'red';
-    // }
-    // }
-
-
+// function random(field, name) {
+//   let search = [];
+//   let ship = document.querySelectorAll('.' + name + '');
+//   let table = document.getElementsByTagName('table');
+//   for (let i = 0; i < ship.length; i++) {
+//     ship[i].style.transformOrigin = '0 0';
+//     (game.random(1) === 1) ? (ship[i].style.transform = 'rotate(90deg)') : (ship[i].style.transform = '');
+//     let {posRanShipX, posRanShipY} = pos(ship[i], search);
+//     if (!ship[i].style.transform) {
+//       ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow + 'px';
+//       ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
+//       for (let p = 0; p < Math.round(ship[i].offsetWidth / game.sizeRow); p++) {
+//         search.push([posRanShipX + p, posRanShipY].toString());
+//         search.push([posRanShipX + p, posRanShipY + 1].toString());
+//         search.push([posRanShipX + p, posRanShipY + 2].toString());
+//         search.push([posRanShipX + p + 1, posRanShipY].toString());
+//         search.push([posRanShipX + p + 1, posRanShipY + 1].toString());
+//         search.push([posRanShipX + p + 1, posRanShipY + 2].toString());
+//         search.push([posRanShipX + p + 2, posRanShipY].toString());
+//         search.push([posRanShipX + p + 2, posRanShipY + 1].toString());
+//         search.push([posRanShipX + p + 2, posRanShipY + 2].toString());
+//         field.appendChild(ship[i]);
+//       }
+//     } else {
+//       ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipY * game.sizeRow + game.sizeRow * 2 + 'px';
+//       ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipX * game.sizeRow + game.sizeRow + 'px';
+//       for (let p = 0; p < Math.round(ship[i].offsetWidth / game.sizeRow); p++) {
+//         search.push([posRanShipY, posRanShipX + p].toString());
+//         search.push([posRanShipY, posRanShipX + p + 1].toString());
+//         search.push([posRanShipY, posRanShipX + p + 2].toString());
+//         search.push([posRanShipY + 1, posRanShipX + p].toString());
+//         search.push([posRanShipY + 1, posRanShipX + p + 1].toString());
+//         search.push([posRanShipY + 1, posRanShipX + p + 2].toString());
+//         search.push([posRanShipY + 2, posRanShipX + p].toString());
+//         search.push([posRanShipY + 2, posRanShipX + p + 1].toString());
+//         search.push([posRanShipY + 2, posRanShipX + p + 2].toString());
+//         field.appendChild(ship[i]);
+//       }
+//     }
+//   }
+// }
+// функция создания массива из которого будут удаляться выстрелы
+function fieldShot(name){
+  name = [];
+  for(let x = 1; x <game.size; x++){
+    for(let y =1; y<game.size;y++){
+      name.push([x,y].toString());
+    }
+  }
+  return name;
+}
+game.playerShot = fieldShot('playerShot');
+game.computerShot = fieldShot('computerShot');
+//удаление выполненых выстрелов
+function deleteShot(x,y,where){
+  let value = [x,y].toString();
+  function del(shot){
+    return shot != value;
+  }
+where = where.filter(del);
+  return where;
+}
 function showShipComputer(){
   game.randomComputer = []
   for (let i = 0; i < computerShip.length; i++) {
@@ -502,27 +567,19 @@ function showShipComputer(){
   }
 }
 function wrapperRandom() {
-  game.randomPlayer = []
-  random(battleBoard, 'player')
-  squareBusy(seach('player'),'battleBoard',game.randomPlayer)
-  console.log(game.randomPlayer)
+  game.randomPlayer = [];
+ seach2(battleBoard, 'player');
+  squareBusy(seach('player'),'battleBoard',game.randomPlayer);
 }
-
 //------------------------------------------------
-
-
-
-
 game.board = document.getElementById('board');
 game.boardShips = document.getElementById('ship');
 game.battleBoard = document.getElementById('battleBoard');
-
-
 function namePlayer(value, name){
   value = document.createElement('span');
   value.style.width = '50%';
   value.style.height = game.sizeRow*2+'px';
-  value.style.border = '1px solid darkpink';
+  // value.style.border = '1px solid darkpink';
   value.style.display = 'inline-block';
   value.style.textAlign = 'center';
   value.style.position = 'relative';
@@ -530,15 +587,15 @@ value.className = 'Name';
   boardGame.appendChild(value);
   let text = document.createElement('h3');
   if(name == 'player'){
-    text.textContent = document.getElementById('name').value
+    text.textContent = document.getElementById('name').value;
   }else {
-    text.textContent = game.computerName[game.random(7)]
+    text.textContent = game.computerName[game.random(7)];
   }
   value.appendChild(text);
+  text.id = name+'Name';
   text.style.verticalAlign = 'middle';
   text.style.fontSize = '25px';
 }
-
 // отрисовываем сетку 10х10
 function createBord(field) {
     let tab = document.createElement('table');
@@ -550,6 +607,7 @@ function createBord(field) {
   tab.style.height = game.sizeRow * game.size + 'px';
   tab.style.width = game.sizeRow * game.size + 'px';
   tab.style.zIndex = '-1';
+  tab.style.background = '';
   tab.setAttribute('id', field.id+'Tab');
   for (let i = 1; i <= game.size; i++) {
     let row = document.createElement('tr');
@@ -584,8 +642,6 @@ function Letters(field) {
     }
   }
 }
-
-// game.homeShips = document.getElementById('homeShips')
 // показываем корабли
 function createShip(player, name) {
   game.homeShips = document.getElementById('HomeShips')
@@ -609,26 +665,35 @@ function createShip(player, name) {
     }
   }
 }
-createShip(game.shipPlayer, 'player')
+createShip(game.shipPlayer, 'player');
 createShip(game.shipComputer, 'computer');
 
 //создание выстрела
 document.addEventListener('click', startBattle, false);
 function startBattle(EO){
-
   EO = EO || window.event;
   EO.preventDefault();
-  if(EO.target.tagName == 'TD') {
+  let cName = document.getElementById('computerName')
+  cName.style.color = 'black';
+  if(EO.target.tagName === 'TD') {
     let shotX = Math.round(EO.target.offsetLeft / game.sizeRow);
     let shotY = Math.round(EO.target.offsetTop / game.sizeRow);
-    for (let i of game.randomPlayer) {
-      if (shotX == i[0] && shotY == i[1]) {
+    game.playerShot = deleteShot(shotX,shotY,game.playerShot);
+    playerShot.innerHTML = 'Осталось сделать: '+ game.playerShot.length + 'выстрела';
+      if (game.randomComputer.indexOf([shotX,shotY].toString()) !== -1) {
         EO.target.style.background = 'green';
-        return
+        console.log(EO.target.style.background)
+        game.hitPlayer+=1;
+        if(game.hitPlayer === 20){
+          game.rezultPl.winner+=1;
+          winner.show();
+        }
+        deleteShot(shotX,shotY, game.randomPlayer);
       } else {
+        playComputer();
         EO.target.style.background = 'black';
+        cName.style.color = 'red';;
       }
-    }
   }
 }
 // создание метки
@@ -652,43 +717,14 @@ function  areaShip(EO){
   EO = EO||window.event;
   if(EO.target.className == 'player'){
     EO.preventDefault();
-    game.randomPlayer = []
+    game.randomPlayer = [];
     let ship = document.getElementsByClassName('player');
-squareBusy(ship,'battleBoard',game.randomPlayer)
-    console.log(game.randomPlayer)
+squareBusy(ship,'battleBoard',game.randomPlayer);
   }
 }
 //--------------------------------------------------------------
 let table = document.getElementById('boardTab');
 let tablePosition = table.getBoundingClientRect();
-
-
-
-// function createShips() { // отрисовываем корабли
-//   for (let i = 0; i < game.ship.length; i++) {
-//     let posLeft = game.sizeRow
-//     for (let k = 0; k < game.ship.length - i; k++) {
-//       let ship = document.createElement('img');
-//       game.boardShips.appendChild(ship);
-//       ship.setAttribute('src', 'image/ship' + game.ship[i] + '.png');
-//       ship.setAttribute('class', game.ship[i]);
-//       ship.style.position = 'absolute';
-//       ship.style.width = game.ship[i][0] * game.sizeRow + 'px';
-//       ship.style.left = posLeft + 'px';
-//       posLeft += ship.offsetWidth + game.sizeRow
-//       ship.style.top = game.sizeRow * 2 * i + help.getBoundingClientRect().bottom + game.sizeRow + 'px';
-//       ship.style.height = game.sizeRow + 'px';
-//       ship.style.boxSizing = 'border-box';
-//     }
-//   }
-// }
-// createShips()
-
-
-
-
-
-
 
 function pullImage() {
   let DragImage = null;
@@ -699,7 +735,6 @@ function pullImage() {
   let position = [];
   let DragImagePosition;
   window.onload = save;
-
   function save() {
     for (let i = image.length - 1; i > -1; i--) {
       position[i] = {
@@ -707,7 +742,6 @@ function pullImage() {
         left: image[i].offsetLeft + 'px',
       }
     }
-
     function positions() {
       for (let p = position.length - 1; p > -1; p--) {
         image[p].style.top = position[p].top;
@@ -715,14 +749,11 @@ function pullImage() {
         image[p].style.position = 'absolute';
       }
     }
-
     positions();
   }
-
   document.addEventListener('mousedown', DragStart, false);
   let firstPositionLeft = 0;
   let firstPositionTop = 0;
-
   function DragStart(EO) {
     EO = EO || window.event;
     if (EO.target.tagName == 'IMG') {
@@ -740,7 +771,6 @@ function pullImage() {
       window.onmousemove = DragMove;
     }
   }
-
   function DragMove(EO) {
     EO = EO || window.event;
     EO.preventDefault();
@@ -763,12 +793,10 @@ function pullImage() {
           activeShipX += n;
           for (let i = 0; i < game.randomPlayer.length; i++){
           if(activeShipX == game.randomPlayer[i[0]]){
-            console.log(game.randomPlayer[i[0]])
+            console.log(game.randomPlayer[i[0]]);
             DragImage.style.border = '4px solid pink';}
           }
           activeShip.push([activeShipX, activeShipY]);
-          // console.log('x ' +activeShipX)
-          // console.log('y '+activeShipY)
         }
       } else {
         for (let n = 0; n < Math.round(DragImage.offsetWidth / 10) * 10 / (Math.round(game.sizeRow / 10) * 10); n++) {
@@ -778,7 +806,6 @@ function pullImage() {
           activeShip.push([activeShipX, activeShipY]);
         }
       }
-
     for (let arr of game.randomPlayer) {
       for (let p = 0; p < activeShip.length; p++) {
         if (activeShip[p][0]===arr[0] && activeShip[p][1]===arr[1]) {
@@ -791,35 +818,8 @@ function pullImage() {
         }
       }
     }
-//---------------------------------------------------
-//     let value = game.battleBoard.children
-//     for (let v = 0; v < value.length; v++) {
-//       if (value[v].offsetLeft < DragImagePosition.right + game.sizeRow && value[v].offsetLeft + value[v].offsetWidth > DragImagePosition.left - game.sizeRow
-//         && value[v].offsetTop < DragImagePosition.bottom + game.sizeRow && value[v].offsetTop + value[v].offsetHeight > DragImagePosition.top - game.sizeRow) {
-//         DragImage.style.border = '3px solid green';
-//
-//       } else {
-//         DragImage.style.border = '0';
-// //?????????????????????????
-//       }console.log("v = "+v)
-//     }
-    // }
-    // let ships = battleBoard.children;
-    // for (let value of ships) {
-    //   if (value === DragImage) {
-    //     continue
-    //   }
-    //
-    //   if (value.offsetLeft < DragImagePosition.right + game.sizeRow && value.offsetLeft+value.offsetWidth > DragImagePosition.left - game.sizeRow
-    //     && value.offsetTop < DragImagePosition.bottom + game.sizeRow && value.offsetTop + value.offsetHeight > DragImagePosition.top - game.sizeRow) {
-    //     console.log(value.offsetWidth)
-    //     DragImage.style.border = '3px solid green';
-    //   }
-    //   else{DragImage.style.border = '1px solid blue'}
-    // }
     window.onmouseup = DragStop;
   }
-
   function DragStop(EO) {
     EO = EO || window.event;
     DragImagePosition = DragImage.getBoundingClientRect();
@@ -841,19 +841,15 @@ function pullImage() {
     }
     if (game.battleBoard.children.length > 10) {
       buttonPlay.show();
-
     }
-    squareBusy(DragImage)
+    squareBusy(DragImage);
     window.onmousemove = null;
     window.onmouseup = null;
     DragImage.style.cursor = 'auto';
   }
 }
-
 pullImage()
-
 //---------------------------------------------------------------
-
 function squareBusy(activeShip, board, when) {
   for(let i=0; i<activeShip.length; i++){
   if (activeShip[i].style.transform == ''|| undefined) {
@@ -862,7 +858,7 @@ function squareBusy(activeShip, board, when) {
       let squareY = Math.round(Math.round((activeShip[i].offsetTop - tablePosition.top)) / game.sizeRow);
       squareX += n;
       if (activeShip[i].parentElement.id == board) {
-       when.push([squareX, squareY])
+       when.push([squareX, squareY].toString());
       }
     }
   } else {
@@ -871,14 +867,12 @@ function squareBusy(activeShip, board, when) {
       let squareY = Math.round(Math.round((activeShip[i].offsetTop - tablePosition.top)) / game.sizeRow);
       squareY += n;
       if (activeShip[i].parentElement.id == board) {
-       when.push([(squareX-1), squareY])
+       when.push([(squareX-1), squareY].toString())
       }}
     }
   }
-
 }
 // -------------------------------------------------------------
-
 // поворот на 90
 document.addEventListener("contextmenu", Rotate, false);
 
@@ -890,107 +884,71 @@ function Rotate(EO) {
     ImageRotate.style.transformOrigin = '' + game.sizeRow + 'px' + ' ' + 0 + 'px' + '';
     if (!ImageRotate.style.transform) {
       ImageRotate.style.transform = 'rotate(90deg)';
-      // ImageRotate.style.left = ImageRotate.style.left.replace('px', '') * 1 + game.sizeRow + 'px';
     } else {
       ImageRotate.style.transform = '';
-      // ImageRotate.style.left = ImageRotate.style.left.replace('px', '') * 1 - game.sizeRow + 'px';
     }
   }
 }
-
-//
-// function Update() {
-//   let ship = document.getElementsByClassName('player');
-//   for(let i =0; i< ship.length; i++){
-//     ship[i].remove()
-//   }
-//   // HomeShips.remove();
-//   // battleBoard.remove();
-//   // createHomeShips();
-//   // createShip(game.shipPlayer, 'player');
-//   // createBattleBoard();
-//   // createButtonUpdate();
-//   // createButtonRandom();
-// }
-// Update()
-
 function seach(name){
   let shipName = document.getElementsByClassName(name)
-  return shipName
+  return shipName;
 }
 
-
-// создать дистанцию кораблей
-// отработать поподания по кораблям
-// создать рандомную расстановку кораблей
-//----------------------------------------------------------------
-// const sendData = async (url, data) => {
-//   const response = await fetch(url, {
-//     method: 'POST', body: data
-//   });
-//
-//   if (response.ok) {
-//     throw new Error(`Ошибка ${url}, status${response}`)
-//   }
-//   return await response.json();
-// }
-//
-// const sendCart = () => {
-//   const data = {
-//     Name: document.getElementById('name').value,
-//     winner: 0,
-//     losing:0
-//   }
-//
-//   const cardList = JSON.stringify(data)
-//   sendData('https://jsonplaceholder.typicode.com/posts', cardList)
-// }
-// sendCart()
-//
-// const get = async (url) =>{
-//     const response = await fetch(url)
-// return await  response.json()
-// }
-//  get('https://jsonplaceholder.typicode.com/posts')
-//      .then((data)=> console.log(data))
-// function notBak(){
-//   let shipB = document.querySelectorAll('.computer');
-//   console.log(shipB)
-//   for( let i = 0; i < shipB.length; i++){
-//     let shipX = shipB[i].style.left.slice(0,-2)
-//     let shipY = shipB[i].style.top.slice(0,-2)
-//     let squareX = Math.ceil((shipX - tablePosition.left) / game.sizeRow);
-//     let squareY = Math.ceil((shipY - tablePosition.top) / game.sizeRow);
-//   if(squareX > 10 && shipB[i].offsetWidth/game.sizeRow>1 &&  !shipB[i].style.transform){
-//     random(HomeShips, game.randomPlayer, 'computer');
-//   }
-//     if(squareX >= 10 && shipB[i].offsetWidth/game.sizeRow>2 &&  !shipB[i].style.transform){
-//       random(HomeShips, game.randomPlayer, 'computer');
-//     }if(squareX >= 10 && shipB[i].offsetWidth/game.sizeRow>3 &&  !shipB[i].style.transform){
-//       random(HomeShips, game.randomPlayer, 'computer');
-//     }
-//     if(squareY >= 10 && shipB[i].offsetWidth/game.sizeRow>1 && shipB[i].style.transform){
-//       random(HomeShips, game.randomPlayer, 'computer');
-//     }if(squareY >= 10 && shipB[i].offsetWidth/game.sizeRow>2 && shipB[i].style.transform){
-//       random(HomeShips, game.randomPlayer, 'computer');
-//     }if(squareY >= 10 && shipB[i].offsetWidth/game.sizeRow>3 && shipB[i].style.transform){
-//       random(HomeShips, game.randomPlayer, 'computer');
-//     }
-// console.log(squareY)
-// console.log(squareX)
-//   }
-//
-// }
 function playComputer() {
+  let pName = document.getElementById('playerName')
+  pName.style.color = 'black';
+  computerName.style.color = 'red';
   let tab = document.getElementById('boardTab')
-  let shotX = game.random(9);
-  let shotY = game.random(9);
-  let shotAr = [];
-  for (let i = 0; i < game.shotComputer.length; i++) {
-    if (shotX !== game.shotComputer[i][0] && shotY !== game.shotComputer[i][1]) {
-      tab.rows[shotX+1].cells[shotY+1].style.background = 'red';
+  tab.style.zIndex = '20';
+  let shotX = game.random(9)+1;
+  let shotY = game.random(9)+1;
+  console.log(shotY);
+  console.log(shotX);
+  console.log(game.randomPlayer);
+  game.computerShot = deleteShot(shotY,shotX,game.computerShot);
+  computerShot.innerHTML = 'Осталось сделать: '+ game.computerShot.length + 'выстрела';
+    if(game.randomPlayer.indexOf([shotY,shotX].toString()) !== -1){
+      tab.rows[shotX].cells[shotY].style.background = 'green';
+      game.hitComputer += 1;
+      console.log(game.hitComputer);
+      deleteShot(shotY, shotX, game.computerShot);
+      deleteShot(shotY, shotX, game.randomPlayer);
+      if(game.randomPlayer.indexOf([shotY,(shotX-1)].toString()) === -1 &&
+          game.randomPlayer.indexOf([(shotY+1),shotX].toString()) === -1 &&
+          game.randomPlayer.indexOf([shotY,(shotX+1)].toString()) === -1 &&
+          game.randomPlayer.indexOf([(shotY-1),shotX].toString()) === -1 ){
+        tab.rows[(shotX-1)].cells[shotY].style.background = 'orange';
+        tab.rows[(shotX+1)].cells[shotY].style.background = 'orange';
+        tab.rows[shotX].cells[(shotY-1)].style.background = 'orange';
+        tab.rows[shotX].cells[(shotY+1)].style.background = 'orange';
+      }
+      if(game.computerShot.indexOf([(shotY-1),(shotX-1)].toString()) !== -1){
+        deleteShot((shotY-1), (shotX-1), game.computerShot);
+        tab.rows[(shotX-1)].cells[(shotY-1)].style.background = 'orange';
+      }
+      if(game.computerShot.indexOf([(shotY+1),(shotX+1)].toString()) !== -1){
+        deleteShot((shotY+1), (shotX+1), game.computerShot);
+        tab.rows[(shotX+1)].cells[(shotY+1)].style.background = 'orange';
+      }
+      if(game.computerShot.indexOf([(shotY+1),(shotX-1)].toString()) !== -1){
+        deleteShot((shotY+1), (shotX-1), game.computerShot);
+        tab.rows[(shotX-1)].cells[(shotY+1)].style.background = 'orange';
+      }
+      if(game.computerShot.indexOf([(shotY-1),(shotX+1)].toString()) !== -1){
+        deleteShot((shotY-1), (shotX+1), game.computerShot);
+        tab.rows[(shotX+1)].cells[(shotY-1)].style.background = 'orange';
+      }
+      playComputer()
+      if(game.hitComputer === 20){
+        game.rezultPl.losing += 1;
+        total.innerHtml = game.losingText[game.random(7)];
+      }
+    }else{
+      tab.rows[shotX].cells[shotY].style.background = 'black';
+      deleteShot(shotX, shotY, game.computerShot);
+      pName.style.color = 'red';
+      computerName.style.color = 'black';
+      console.log(game.randomPlayer);
+      console.log(game.computerShot);
     }
-  }
-  shotAr.push((shotY+1), (shotX+1))
-  game.shotComputer.push(shotAr);
 }
