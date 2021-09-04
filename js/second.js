@@ -240,12 +240,8 @@ let textH = new TextModal({ // текст в поле подсказке
     id: 'textHelp',
     margin: game.sizeRow + 'px',
     fontSize: '15px',
-    textContent: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. ' +
-        'Earum exercitationem numquam officia optio veritatis! Assumenda beatae ' +
-        'cupiditate delectus enim illo, officia quae quos temporibus! Adipisci' +
-        ' alias amet aut ducimus eius est eum fugit illum minus mollitia, ' +
-        'perferendis, repellendus reprehenderit repudiandae suscipit voluptas?' +
-        ' Alias animi cumque nam praesentium quam quasi voluptatem!'
+    textContent: 'Перетащите корабль на игровое поле, нажав и удерживая левую кнопку мыши, ' +
+        'для поворота корабля необходимо кликнуть по кораблю правой кнопкой мыши'
 })
 const homeShips = new Field({
     parent: 'ship',
@@ -380,6 +376,10 @@ function okRez() {
 }
 
 function repeat() {
+    switchToList({page: 'second'});
+    boardTab.remove();
+    shipTab.remove();
+    createBord(game.board)
 }
 
 function ok() {
@@ -424,9 +424,13 @@ function play() {
     namePlayer('computer', 'computer');
     createBord(game.boardShips);
     showShipComputer();
-    seach2(HomeShips, 'computer');
     squareBusy(seach('computer'), 'HomeShips', game.randomComputer)
-    playComputer();
+    game.computerShot = null;
+    game.playerShot = null;
+    computerShot.innerHTML = 'Счет оставшихся ходов - '+ computerName.textContent;
+    playerShot.innerHTML = 'Счет оставшихдя ходов - '+ playerName.textContent;
+    game.playerShot = fieldShot('playerShot');
+    game.computerShot = fieldShot('computerShot');
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -511,8 +515,7 @@ function fieldShot(name) {
     return name;
 }
 
-game.playerShot = fieldShot('playerShot');
-game.computerShot = fieldShot('computerShot');
+
 
 //удаление выполненых выстрелов
 function deleteShot(x, y, where) {
@@ -665,7 +668,8 @@ function startBattle(EO) {
             }
             deleteShot(shotX, shotY, game.randomPlayer);
         } else {
-            playComputer();
+            setTimeout( playComputer, 5000)
+            // playComputer();
             EO.target.style.background = 'black';
         }
     }
@@ -893,9 +897,6 @@ function playComputer() {
     tab.style.zIndex = '20';
     let shotX = game.random(9) + 1;
     let shotY = game.random(9) + 1;
-    console.log(shotY);
-    console.log(shotX);
-    console.log(game.randomPlayer);
     game.computerShot = deleteShot(shotY, shotX, game.computerShot);
     computerShot.innerHTML = 'Осталось сделать: ' + game.computerShot.length + 'выстрела';
     if (game.randomPlayer.indexOf([shotY, shotX].toString()) !== -1) {
@@ -943,3 +944,5 @@ function playComputer() {
         console.log(game.computerShot);
     }
 }
+let aud = new Audio('../audio/sea.mp3');
+aud.play();

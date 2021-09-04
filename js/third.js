@@ -4,12 +4,12 @@ var Player;
 var UpdatePassword;
 
 function ShowMessages() {
-  var Str = '';
-  for (var i = 0; i < Player.length; i++) {
-    var playerNew = Player[i];
+  let Str = '';
+  for (let i = 0; i < Player.length; i++) {
+    let playerNew = Player[i];
     Str += "<b>" + EscapeHTML(playerNew.name) + ":</b> "
         + EscapeHTML(playerNew.winner) + ":</b> "
-        + EscapeHTML(playerNew.losing) + "<br />";
+        + EscapeHTML(playerNew.losing) + "<br/>";
   }
   document.getElementById('modalRez').innerHTML = Str;// appendChild
 }
@@ -31,7 +31,7 @@ function RefreshMessages() {
       {
         url: AjaxHandlerScript,
         type: 'POST',
-        data: {f: 'READ', n: 'PAVEL_BATTLE_SHIP'},
+        data: {f: 'READ', n: 'PAVEL_SEABATTLE'},
         cache: false,
         success: ReadReady,
         error: ErrorHandler
@@ -61,7 +61,7 @@ function SendMessage() {
         url: AjaxHandlerScript,
         type: 'POST',
         data: {
-          f: 'LOCKGET', n: 'PAVEL_BATTLE_SHIP',
+          f: 'LOCKGET', n: 'PAVEL_SEABATTLE',
           p: UpdatePassword
         },
         cache: false,
@@ -82,7 +82,7 @@ function LockGetReady(ResultH) {
       if (!Player.length)
         Player = [];
     }
-    var PlayerName = document.getElementById('name').value;
+    let PlayerName = document.getElementById('name').value;
     Player.push({name: PlayerName, winner: game.rezultPl.winner, losing: game.rezultPl.losing});
     if (Player.length > 10)
       Player = Player.slice(Player.length - 10);
@@ -92,7 +92,7 @@ function LockGetReady(ResultH) {
           url: AjaxHandlerScript,
           type: 'POST',
           data: {
-            f: 'UPDATE', n: 'PAVEL_BATTLE_SHIP',
+            f: 'UPDATE', n: 'PAVEL_SEABATTLE',
             v: JSON.stringify(Player), p: UpdatePassword
           },
           cache: false,

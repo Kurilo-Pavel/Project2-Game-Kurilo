@@ -54,7 +54,8 @@ function renderNewList() {
       total.hide()
       buttonNewGame.hide()
       buttonRezult.hide()
-        winner.hide()
+      butRepeat.hide()
+      winner.hide()
       HomeShips.style.height = 9*game.sizeRow + 'px'
       for (let i = 0; i < computerShip.length; i++) {
         computerShip[i].style.display = 'none';
@@ -63,7 +64,8 @@ function renderNewList() {
       for(let i=0; i<name.length;i++){
         name[i].remove()
       }
-      battleBoard.style.zIndex=2;
+      battleBoard.style.zIndex= '2';
+      boardTab.style.zIndex= '-1';
       if(document.getElementById('shipTab')){
       document.getElementById('shipTab').remove()}
 
