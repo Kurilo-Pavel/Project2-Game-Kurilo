@@ -427,6 +427,8 @@ const speedComputer = new Button({
 //------------------------------------------------
 function newGame() {
   modalWind.show();
+  game.rezultPl.winner = 0;
+  game.rezultPl.losing = 0;
 }
 
 function rezult() {
