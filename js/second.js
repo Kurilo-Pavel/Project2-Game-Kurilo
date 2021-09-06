@@ -819,7 +819,6 @@ function startBattle(EO) {
     if (game.randomComputer.indexOf([shotX, shotY].toString()) !== -1) {
       AudioShot.play()
       EO.target.style.background = 'green';
-      console.log(EO.target.style.background)
       game.hitPlayer += 1;
       if (game.hitPlayer === 20) {
         game.rezultPl.winner += 1;
@@ -849,7 +848,6 @@ function playComputer() {
     AudioShot.play()
     tab.rows[shotX].cells[shotY].style.background = 'green';
     game.hitComputer += 1;
-    console.log(game.hitComputer);
     deleteShot(shotY, shotX, game.computerShot);
     deleteShot(shotY, shotX, game.randomPlayer);
     if (game.randomPlayer.indexOf([shotY, (shotX - 1)].toString()) === -1 &&
@@ -934,8 +932,6 @@ function pullImage() {
       firstPositionTop = DragImage.style.top;
       DragImage.style.cursor = 'grabbing';
       DragImage.style.position = 'absolute';
-      DragImage.style.border = '1px solid black';
-      DragImage.style.boxSizing = 'border-box';
       clickInImgX = EO.pageX - DragImage.offsetLeft;
       clickInImgY = EO.pageY - DragImage.offsetTop;
       window.onmouseup = DragStop;
