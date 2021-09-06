@@ -31,7 +31,7 @@ function RefreshMessages() {
       {
         url: AjaxHandlerScript,
         type: 'POST',
-        data: {f: 'READ', n: 'PAVEL_SEABATTLE'},
+        data: {f: 'READ', n: 'SEABATTLE_PAVEL'},
         cache: false,
         success: ReadReady,
         error: ErrorHandler
@@ -61,7 +61,7 @@ function SendMessage() {
         url: AjaxHandlerScript,
         type: 'POST',
         data: {
-          f: 'LOCKGET', n: 'PAVEL_SEABATTLE',
+          f: 'LOCKGET', n: 'SEABATTLE_PAVEL',
           p: UpdatePassword
         },
         cache: false,
@@ -92,7 +92,7 @@ function LockGetReady(ResultH) {
           url: AjaxHandlerScript,
           type: 'POST',
           data: {
-            f: 'UPDATE', n: 'PAVEL_SEABATTLE',
+            f: 'UPDATE', n: 'SEABATTLE_PAVEL',
             v: JSON.stringify(Player), p: UpdatePassword
           },
           cache: false,
