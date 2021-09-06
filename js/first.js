@@ -72,6 +72,7 @@ function renderNewList() {
       buttonRezult.hide();
       HomeShips.style.height = board.offsetHeight + 'px';
       shipTab.style.zIndex = '2';
+      HomeS.style.overflow = 'hidden';
       break;
   }
 }

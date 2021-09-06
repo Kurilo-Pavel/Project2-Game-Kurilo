@@ -1110,6 +1110,7 @@ function secret(name) {
     }
     fantom[i].style.left = (pirate[i][0] + 1) * game.sizeRow + 'px';
     fantom[i].style.top = (pirate[i][1] + 2) * game.sizeRow + 'px';
+   ;
   }
 }
 
