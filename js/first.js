@@ -56,7 +56,7 @@ function renderNewList() {
       if (document.getElementById('shipTab')) {
         document.getElementById('shipTab').remove()
       }
-
+      HomeS.style.overflow = 'hidden';
       break;
     case 'third':
       battleBoard.style.zIndex = '-1';
@@ -72,6 +72,7 @@ function renderNewList() {
       buttonRezult.hide();
       HomeShips.style.height = board.offsetHeight + 'px';
       shipTab.style.zIndex = '2';
+      HomeS.style.overflow = 'hidden';
       break;
   }
 }
