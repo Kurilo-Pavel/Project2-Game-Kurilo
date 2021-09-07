@@ -823,6 +823,8 @@ function startBattle(EO) {
       if (game.hitPlayer === 20) {
         game.rezultPl.winner += 1;
         winner.show();
+        locStorage();
+        SendMessage();
       }
       deleteShot(shotX, shotY, game.randomPlayer);
     } else {
@@ -879,6 +881,8 @@ function playComputer() {
     if (game.hitComputer === 20) {
       game.rezultPl.losing += 1;
       total.innerHtml = game.losingText[game.random(7)];
+      locStorage();
+      SendMessage();
     }
   } else {
     AudioBulk.play()
