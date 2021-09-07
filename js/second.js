@@ -495,8 +495,6 @@ function back() {
 
 function playGame() {
   switchToList({page: 'third'});
-  // HomeS.remove()
-  // createSecondBoardShip()
   namePlayer('player', 'player');
   namePlayer('computer', 'computer');
   createBord(game.boardShips);
@@ -525,33 +523,47 @@ createSecondBoardShip()
 //////////////////////////////////////////////////////////////////////
 
 function pos(sh, sea) {
-
   let posRanShipX = game.random(9 - Math.floor(sh.offsetWidth) / Math.round(game.sizeRow));
   let posRanShipY = game.random(9);
   if (!sh.style.transform) {
-    if (sea.indexOf([(posRanShipX + 1), (posRanShipY + 1)].toString()) !== -1) {
-      pos(sh, sea);
+    let x = 0;
+    for (let p = 0; p < Math.round(sh.offsetWidth / game.sizeRow); p++) {
+      if (sea.indexOf([(posRanShipX + p + 1), (posRanShipY + 1)].toString()) == -1) {
+        x += 1;
+      }
+    }
+    if (x !== Math.round(sh.offsetWidth / game.sizeRow)) {
+      return pos(sh, sea);
     } else {
       return {posRanShipX, posRanShipY};
     }
   } else {
-    if (sea.indexOf([(posRanShipY + 1), (posRanShipX + 1)].toString()) !== -1) {
-
-      pos(sh, sea);
+    let x = 0;
+    for (let p = 0; p < Math.round(sh.offsetWidth / game.sizeRow); p++) {
+      if (sea.indexOf([(posRanShipY + p + 1), (posRanShipX + 1)].toString()) == -1) {
+        x += 1;
+      }
+    }
+    if (x !== Math.round(sh.offsetWidth / game.sizeRow)) {
+      return pos(sh, sea);
     } else {
       return {posRanShipX, posRanShipY};
+
     }
   }
 }
+
 
 function random(field, name) {
   let search = [];
   let ship = document.querySelectorAll('.' + name + '');
   let table = document.getElementsByTagName('table');
+
   for (let i = 0; i < ship.length; i++) {
     ship[i].style.transformOrigin = '0 0';
     (game.random(1) === 1) ? (ship[i].style.transform = 'rotate(90deg)') : (ship[i].style.transform = '');
     let {posRanShipX, posRanShipY} = pos(ship[i], search);
+
     if (!ship[i].style.transform) {
       ship[i].style.left = table[0].getBoundingClientRect().left + posRanShipX * game.sizeRow + game.sizeRow + 'px';
       ship[i].style.top = table[0].getBoundingClientRect().top + posRanShipY * game.sizeRow + game.sizeRow + 'px';
@@ -583,7 +595,9 @@ function random(field, name) {
         field.appendChild(ship[i]);
       }
     }
+    console.log(search)
   }
+
 }
 
 // функция создания массива из которого будут удаляться выстрелы
@@ -823,6 +837,8 @@ function startBattle(EO) {
       if (game.hitPlayer === 20) {
         game.rezultPl.winner += 1;
         winner.show();
+        locStorage();
+        SendMessage();
       }
       deleteShot(shotX, shotY, game.randomPlayer);
     } else {
@@ -879,6 +895,8 @@ function playComputer() {
     if (game.hitComputer === 20) {
       game.rezultPl.losing += 1;
       total.innerHtml = game.losingText[game.random(7)];
+      locStorage();
+      SendMessage();
     }
   } else {
     AudioBulk.play()
@@ -1106,7 +1124,7 @@ function secret(name) {
     }
     fantom[i].style.left = (pirate[i][0] + 1) * game.sizeRow + 'px';
     fantom[i].style.top = (pirate[i][1] + 2) * game.sizeRow + 'px';
-   ;
+    ;
   }
 }
 
